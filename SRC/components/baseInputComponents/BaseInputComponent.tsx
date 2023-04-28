@@ -9,7 +9,7 @@ export default function BaseInputComponent(props: {
   rows?: number;
   onChangeText: any;
   numberOfLines?: number;
-  children: string | number;
+  children?: string | number;
   textStyle?: {};
 }) {
   return (
