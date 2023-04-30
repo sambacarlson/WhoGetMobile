@@ -1,10 +1,20 @@
 import React from 'react';
-import {Text, View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
+import AskCard from '../../components/compoundComponents/AskCard';
 
 export default function AllAsks() {
   return (
-    <View>
-      <Text> here are the asks we have prepared for you; </Text>
+    <View style={styles.Container}>
+      <AskCard />
+      <AskCard />
+      <AskCard />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  Container: {
+    backgroundColor: 'white',
+    paddingHorizontal: 24,
+  },
+});

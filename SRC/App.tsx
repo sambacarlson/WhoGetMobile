@@ -19,7 +19,7 @@ function App(): JSX.Element {
     <NavigationContainer>
       <StatusBar backgroundColor={whotheme.colors.primary} />
       <Stack.Navigator
-        initialRouteName="Interests"
+        initialRouteName="AsksNav"
         screenOptions={{
           headerStyle: {backgroundColor: whotheme.colors.primary},
           headerTitleStyle: {
@@ -29,7 +29,7 @@ function App(): JSX.Element {
           headerTintColor: 'white',
           headerShadowVisible: false,
         }}>
-        <Stack.Screen name="Asks" component={AsksNav} />
+        <Stack.Screen name="AsksNav" component={AsksNav} />
         <Stack.Screen
           name="Splash"
           component={Splash}

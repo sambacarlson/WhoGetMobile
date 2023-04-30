@@ -1,7 +1,7 @@
 /** Main Stack Navigation*/
 export type RootStackParams = {
   Splash: undefined;
-  Asks: undefined;
+  AsksNav: undefined;
   Auth: undefined;
   Interests: undefined;
   Respond: undefined;
