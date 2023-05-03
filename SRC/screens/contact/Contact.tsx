@@ -1,5 +1,11 @@
 import React, {useState} from 'react';
-import {ActivityIndicator, Image, StyleSheet, View} from 'react-native';
+import {
+  ActivityIndicator,
+  Image,
+  StatusBar,
+  StyleSheet,
+  View,
+} from 'react-native';
 import {ScrollView} from 'react-native-gesture-handler';
 import Heading1Text from '../../components/baseTextComponents/heading1Text/Heading1Text';
 import BodyText from '../../components/baseTextComponents/bodyText/BodyText';
@@ -7,6 +13,7 @@ import Heading2Text from '../../components/baseTextComponents/heading2Text/Headi
 import BaseInputComponent from '../../components/baseInputComponents/BaseInputComponent';
 import {ActionButton} from '../../components/baseButtonComponents/actionButton/ActionButton';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import {whotheme} from '../../global/variables';
 
 const image_add = require('../../images/icons/image_add.png');
 
@@ -17,6 +24,10 @@ export default function Contact() {
   const [loading, setLoading] = useState<boolean>(false);
   return (
     <SafeAreaView>
+      <StatusBar
+        backgroundColor={whotheme.colors.primary}
+        barStyle={'light-content'}
+      />
       <ScrollView style={styles.Container}>
         <Heading1Text>How can you be contacted?</Heading1Text>
         <BodyText>Provide at least 2 contact informations</BodyText>

@@ -1,6 +1,6 @@
+/* eslint-disable react/no-unstable-nested-components */
 import React from 'react';
 import {whotheme} from './global/variables';
-import {StatusBar} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import AsksNav from './screens/asks/AsksNav';
@@ -11,15 +11,16 @@ import Respond from './screens/respond/Respond';
 import Contact from './screens/contact/Contact';
 import NewAsk from './screens/new/NewAsk';
 import EditAsk from './screens/edit/EditAsk';
-import {RootStackParams} from './global/types';
+import {RouteStackParams} from './global/types';
+import HeaderTitle from './components/headerStyleComponents/HeaderTitle';
+// import HeaderRight from './components/headerStyleComponents/HeaderRight';
 
-const Stack = createStackNavigator<RootStackParams>();
+const Stack = createStackNavigator<RouteStackParams>();
 function App(): JSX.Element {
   return (
     <NavigationContainer>
-      <StatusBar backgroundColor={whotheme.colors.primary} />
       <Stack.Navigator
-        initialRouteName="AsksNav"
+        initialRouteName="Auth"
         screenOptions={{
           headerStyle: {backgroundColor: whotheme.colors.primary},
           headerTitleStyle: {
@@ -29,7 +30,14 @@ function App(): JSX.Element {
           headerTintColor: 'white',
           headerShadowVisible: false,
         }}>
-        <Stack.Screen name="AsksNav" component={AsksNav} />
+        <Stack.Screen
+          name="AsksNav"
+          component={AsksNav}
+          options={{
+            headerTitle: () => <HeaderTitle />,
+            headerLeft: () => <></>,
+          }}
+        />
         <Stack.Screen
           name="Splash"
           component={Splash}
@@ -40,11 +48,35 @@ function App(): JSX.Element {
           component={Auth}
           options={{headerShown: false}}
         />
-        <Stack.Screen name="Interests" component={Interests} />
+        <Stack.Screen
+          name="Interests"
+          component={Interests}
+          options={{
+            headerTitle: () => <HeaderTitle />,
+          }}
+        />
         <Stack.Screen name="Respond" component={Respond} />
-        <Stack.Screen name="Contact" component={Contact} />
-        <Stack.Screen name="NewAsk" component={NewAsk} />
-        <Stack.Screen name="EditAsk" component={EditAsk} />
+        <Stack.Screen
+          name="Contact"
+          component={Contact}
+          options={{
+            headerTitle: () => <HeaderTitle />,
+          }}
+        />
+        <Stack.Screen
+          name="NewAsk"
+          component={NewAsk}
+          options={{
+            headerTitle: () => <HeaderTitle />,
+          }}
+        />
+        <Stack.Screen
+          name="EditAsk"
+          component={EditAsk}
+          options={{
+            headerTitle: () => <HeaderTitle />,
+          }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

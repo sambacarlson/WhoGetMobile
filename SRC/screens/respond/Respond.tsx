@@ -7,8 +7,21 @@ const whatsapp = require('../../images/icons/whatsapp.png');
 const telephone = require('../../images/icons/telephone.png');
 const email = require('../../images/icons/email.png');
 const placeholderImage = require('../../images/icons/image.png');
+import {useNavigation} from '@react-navigation/core';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {RouteStackParams} from '../../global/types';
+import HeaderTitle from '../../components/headerStyleComponents/HeaderTitle';
+import HeaderLeft from '../../components/headerStyleComponents/HeaderLeft';
 
 export default function Respond() {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RouteStackParams>>();
+  navigation.setOptions({
+    // eslint-disable-next-line react/no-unstable-nested-components
+    headerTitle: () => <HeaderTitle showProfile={true} />,
+    // eslint-disable-next-line react/no-unstable-nested-components
+    headerLeft: () => <HeaderLeft onPress={() => navigation.pop()} />,
+  });
   return (
     <SafeAreaView style={styles.Container}>
       <BodyText style={styles.TimeLeft}>3 days left</BodyText>

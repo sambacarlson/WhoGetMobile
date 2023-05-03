@@ -1,11 +1,15 @@
 import React, {useState} from 'react';
-import {StyleSheet, ScrollView, View} from 'react-native';
+import {StyleSheet, ScrollView, View, StatusBar} from 'react-native';
 import Heading1Text from '../../components/baseTextComponents/heading1Text/Heading1Text';
 import BodyText from '../../components/baseTextComponents/bodyText/BodyText';
 import Heading2Text from '../../components/baseTextComponents/heading2Text/Heading2Text';
 import {ActionButton} from '../../components/baseButtonComponents/actionButton/ActionButton';
 import CategoryButton from '../../components/baseButtonComponents/categoryButton/CategoryButton';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import {useNavigation} from '@react-navigation/core';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {RouteStackParams} from '../../global/types';
+import {whotheme} from '../../global/variables';
 
 // TODO: remove allCategories array. replace with actual data
 const categories = [
@@ -21,6 +25,8 @@ const categories = [
 ];
 
 export default function Interests() {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RouteStackParams>>();
   const [chosenCategories, setChosenCategories] = useState<string[]>([]);
   const [allCategories, setAllCategories] = useState<string[]>(categories);
 
@@ -42,6 +48,10 @@ export default function Interests() {
   //Return
   return (
     <SafeAreaView style={styles.Container}>
+      <StatusBar
+        backgroundColor={whotheme.colors.primary}
+        barStyle={'light-content'}
+      />
       <Heading1Text>What are your Interests?</Heading1Text>
       <BodyText>Choose as many as interests you</BodyText>
       <ScrollView>
@@ -79,7 +89,7 @@ export default function Interests() {
         </View>
       </ScrollView>
       <ActionButton
-        onPress={undefined}
+        onPress={() => navigation.navigate('Contact')}
         busy={false}
         style={styles.ActionButton}>
         Continue

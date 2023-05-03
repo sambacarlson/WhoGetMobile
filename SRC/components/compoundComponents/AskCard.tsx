@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {Image, StyleSheet, View} from 'react-native';
+import {Image, Pressable, StyleSheet, View} from 'react-native';
 import BodyText from '../baseTextComponents/bodyText/BodyText';
 import Heading2Text from '../baseTextComponents/heading2Text/Heading2Text';
 import {whotheme} from '../../global/variables';
@@ -7,11 +7,18 @@ import {whotheme} from '../../global/variables';
 const profilePlaceholderImage = require('../../images/icons/user.png');
 const profilePlaceholderImage2 = require('../../images/icons/google.png');
 
-export default function AskCard() {
+type AskCardProps = {
+  onPress: any;
+};
+
+export default function AskCard(props: AskCardProps) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [loading, setLoading] = useState<boolean>(true);
   return (
-    <View style={styles.Container}>
+    <Pressable
+      onPress={props.onPress}
+      style={styles.Container}
+      android_ripple={{color: '#f0f0f0'}}>
       <View style={styles.CardContainer}>
         <View style={styles.ImageContainer}>
           {loading ? (
@@ -38,7 +45,7 @@ export default function AskCard() {
           </BodyText>
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -47,7 +54,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   CardContainer: {
-    paddingVertical: 8,
+    padding: 8,
     gap: 9,
     flexDirection: 'row',
     alignItems: 'center',

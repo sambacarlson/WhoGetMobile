@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -11,21 +11,35 @@ import {whotheme} from '../../global/variables';
 import Heading2Text from '../../components/baseTextComponents/heading2Text/Heading2Text';
 import BodyText from '../../components/baseTextComponents/bodyText/BodyText';
 import {ActionButton} from '../../components/baseButtonComponents/actionButton/ActionButton';
-
+import {useNavigation} from '@react-navigation/core';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {RouteStackParams} from '../../global/types';
 const logo = require('../../images/whoget_green.png');
 const facebook = require('../../images/icons/facebook.png');
 const google = require('../../images/icons/google.png');
 
 export default function Auth() {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RouteStackParams>>();
+  useEffect(() => {
+    navigation.push('Splash');
+  }, [navigation]);
   const [busy, setBusy] = useState<boolean>(false);
   const handleSkip = () => {
     setBusy(true);
+    setTimeout(() => {
+      navigation.push('AsksNav');
+    }, 2000);
   };
   const handleFacebookAuth = () => {
     setBusy(true);
   };
   const handleGoogleAuth = () => {
     setBusy(true);
+    //FIXME: remove setTimeout
+    setTimeout(() => {
+      navigation.push('Interests');
+    }, 2000);
   };
 
   return (

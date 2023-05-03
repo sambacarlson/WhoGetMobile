@@ -1,5 +1,5 @@
 /** Main Stack Navigation*/
-export type RootStackParams = {
+export type RouteStackParams = {
   Splash: undefined;
   AsksNav: undefined;
   Auth: undefined;

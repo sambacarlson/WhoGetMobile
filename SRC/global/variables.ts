@@ -10,6 +10,7 @@ export const whotheme = {
     bold: 'Montserrat-Bold',
   },
   fontSize: {
+    small: 8,
     normal: 12,
     medium: 16,
     large: 24,

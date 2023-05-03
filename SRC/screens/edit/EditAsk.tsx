@@ -4,7 +4,10 @@ import {ScrollView} from 'react-native-gesture-handler';
 import BodyText from '../../components/baseTextComponents/bodyText/BodyText';
 import {whotheme} from '../../global/variables';
 import {ActionButton} from '../../components/baseButtonComponents/actionButton/ActionButton';
-
+import {useNavigation} from '@react-navigation/core';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {RouteStackParams} from '../../global/types';
+import HeaderLeft from '../../components/headerStyleComponents/HeaderLeft';
 const editButton = require('../../images/icons/edit.png');
 const deleteButton = require('../../images/icons/delete.png');
 const askImage = require('../../images/icons/image_add.png');
@@ -12,6 +15,12 @@ const askImage = require('../../images/icons/image_add.png');
 export default function EditAsk() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isBusy, setIsBusy] = useState<boolean>(false);
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RouteStackParams>>();
+  navigation.setOptions({
+    // eslint-disable-next-line react/no-unstable-nested-components
+    headerLeft: () => <HeaderLeft onPress={() => navigation.pop()} />,
+  });
   return (
     <View style={styles.Container}>
       <ScrollView style={styles.Wrapper}>

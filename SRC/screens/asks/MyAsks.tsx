@@ -1,10 +1,18 @@
 import React from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
+import AskCard from '../../components/compoundComponents/AskCard';
+import {useNavigation} from '@react-navigation/core';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {RouteStackParams} from '../../global/types';
 
 export default function MyAsks() {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RouteStackParams>>();
   return (
     <View style={styles.Container}>
-      <Text> Asks i've made in the past </Text>
+      <AskCard onPress={() => navigation.navigate('EditAsk')} />
+      <AskCard onPress={() => navigation.navigate('EditAsk')} />
+      <AskCard onPress={() => navigation.navigate('EditAsk')} />
     </View>
   );
 }
@@ -12,5 +20,7 @@ export default function MyAsks() {
 const styles = StyleSheet.create({
   Container: {
     backgroundColor: 'white',
+    paddingHorizontal: 16,
+    flex: 1,
   },
 });
