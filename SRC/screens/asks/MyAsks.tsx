@@ -10,9 +10,7 @@ export default function MyAsks() {
     useNavigation<NativeStackNavigationProp<RouteStackParams>>();
   return (
     <View style={styles.Container}>
-      <AskCard onPress={() => navigation.navigate('EditAsk')} />
-      <AskCard onPress={() => navigation.navigate('EditAsk')} />
-      <AskCard onPress={() => navigation.navigate('EditAsk')} />
+      {/* <AskCard onPress={() => navigation.navigate('EditAsk')} /> */}
     </View>
   );
 }

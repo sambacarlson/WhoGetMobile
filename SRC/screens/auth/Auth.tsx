@@ -29,7 +29,7 @@ export default function Auth() {
     setBusy(true);
     setTimeout(() => {
       navigation.push('AsksNav');
-    }, 2000);
+    }, 500);
   };
   const handleFacebookAuth = () => {
     setBusy(true);
@@ -39,7 +39,7 @@ export default function Auth() {
     //FIXME: remove setTimeout
     setTimeout(() => {
       navigation.push('Interests');
-    }, 2000);
+    }, 500);
   };
 
   return (

@@ -9,6 +9,9 @@ const profilePlaceholderImage2 = require('../../images/icons/google.png');
 
 type AskCardProps = {
   onPress: any;
+  username: string;
+  message: string;
+  expiry: string;
 };
 
 export default function AskCard(props: AskCardProps) {
@@ -37,12 +40,11 @@ export default function AskCard(props: AskCardProps) {
         </View>
         <View style={styles.BodyTextView}>
           <View style={styles.BodyTextInfoView}>
-            <Heading2Text>username</Heading2Text>
-            <BodyText style={styles.DateText}>2 days</BodyText>
+            <Heading2Text>{props.username}</Heading2Text>
+            <BodyText
+              style={styles.DateText}>{`${props.expiry} days`}</BodyText>
           </View>
-          <BodyText>
-            Here is the actual body of the ask. monog aldf jl ald lja; jdf
-          </BodyText>
+          <BodyText>{props.message}</BodyText>
         </View>
       </View>
     </Pressable>

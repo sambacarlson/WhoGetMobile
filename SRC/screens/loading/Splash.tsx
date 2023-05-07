@@ -17,7 +17,7 @@ export default function Splash() {
   const navigation =
     useNavigation<NativeStackNavigationProp<RouteStackParams>>();
   //FIXME: remove setTimeout
-  setTimeout(() => navigation.pop(), 2000);
+  setTimeout(() => navigation.pop(), 1000);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [loading, setLoading] = useState<boolean>(true);
   return (

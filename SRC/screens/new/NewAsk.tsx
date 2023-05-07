@@ -5,6 +5,9 @@ import BaseInputComponent from '../../components/baseInputComponents/BaseInputCo
 import {whotheme} from '../../global/variables';
 import CategoryButton from '../../components/baseButtonComponents/categoryButton/CategoryButton';
 import {ActionButton} from '../../components/baseButtonComponents/actionButton/ActionButton';
+import {useAppDispatch} from '../../redux/redux_store/hooks';
+import {createAsks} from '../../redux/services/requests';
+import axios from 'axios';
 
 const allMyInterests = [
   'Health',
@@ -17,36 +20,88 @@ const allMyInterests = [
 
 const askImage = require('../../images/icons/image_add.png');
 
-export default function NewAsk() {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+export default function NewAsk(this: any) {
+  const dispatch = useAppDispatch();
+
   const [isBusy, setIsBusy] = useState<boolean>(false);
   /**Pick categories */
-  const [categories, setCategories] = useState<string[]>([]);
+  // const [categories, setCategories] = useState<string[]>([]);
   const toggleCategory = (category: string) => {
-    if (categories.includes(category)) {
-      setCategories(categories.filter(c => c !== category));
+    if (newAskData.categories.includes(category)) {
+      // setCategories(categories.filter(c => c !== category));
+      setNewAskData(prevData => ({
+        ...prevData,
+        categories: prevData.categories.filter(c => c !== category),
+      }));
     } else {
-      setCategories([...categories, category]);
+      // setCategories([...categories, category]);
+      setNewAskData(prevData => ({
+        ...prevData,
+        categories: [...prevData.categories, category],
+      }));
     }
-    console.log(categories);
+    // console.log(categories);
   };
+  //form
+  const defaultAskData = {
+    userInfo: {
+      user_id: 't3r45sfe32',
+      username: 'dummyuser',
+      photo: '',
+    },
+    message: '',
+    categories: [],
+    expiry: 1,
+    status: {
+      hidden: false,
+      hiddenDate: '',
+    },
+  };
+  const [newAskData, setNewAskData] = useState(defaultAskData);
+  //methods
+  const handleChange = (name: string, value: any) => {
+    setNewAskData(prevData => ({...prevData, [name]: value}));
+  };
+  //submit
+  const submitForm = async () => {
+    setIsBusy(true);
+    try {
+      // await dispatch(createAsks(newAskData));
+      const response = await axios.post(
+        'https://whoget-api.onrender.com/api/asks',
+        newAskData,
+      );
+      console.log('response ======>>>', response.data);
+      return response.data;
+    } catch (error) {
+      console.warn(error);
+    }
+    setIsBusy(false);
+  };
+  console.log(newAskData);
+
+  //return
   return (
     <ScrollView style={styles.Container}>
       <View style={styles.ContentView}>
         <Heading2Text> Expiry (1 - 7 days)</Heading2Text>
         <BaseInputComponent
-          onChangeText={undefined}
+          onChangeText={(text: number) => {
+            handleChange('expiry', text);
+          }}
           textStyle={styles.Expiry}
-          style={styles.ExpiryView}
-        />
+          style={styles.ExpiryView}>
+          {newAskData.expiry}
+        </BaseInputComponent>
       </View>
       <View style={styles.ContentView}>
         <Heading2Text>Ask</Heading2Text>
         <BaseInputComponent
-          onChangeText={undefined}
+          onChangeText={(text: string) => handleChange('message', text)}
           numberOfLines={7}
-          style={styles.Ask}
-        />
+          style={styles.Ask}>
+          {newAskData.message}
+        </BaseInputComponent>
       </View>
       <View style={styles.ContentView}>
         <Heading2Text>Categories</Heading2Text>
@@ -55,9 +110,9 @@ export default function NewAsk() {
             <CategoryButton
               key={allMyInterests.indexOf(interest) + interest}
               setActiveState={true}
-              onPress={() => toggleCategory(interest)}
-              children={interest}
-            />
+              onPress={() => toggleCategory(interest)}>
+              {interest}
+            </CategoryButton>
           ))}
         </View>
       </View>
@@ -68,7 +123,7 @@ export default function NewAsk() {
         </View>
       </View>
       <View style={styles.ActionButtonView}>
-        <ActionButton onPress={undefined} busy={isBusy}>
+        <ActionButton onPress={!isBusy && submitForm} busy={isBusy}>
           Done
         </ActionButton>
       </View>
