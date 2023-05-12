@@ -9,6 +9,9 @@ const profilePlaceHolder = require('../../images/icons/user.png');
 type HeaderTitleProps = {
   style?: {};
   showProfile?: boolean;
+  userImage?: string;
+  username: string;
+  postDate: string;
 };
 
 export default function HeaderTitle(props: HeaderTitleProps) {
@@ -20,12 +23,19 @@ export default function HeaderTitle(props: HeaderTitleProps) {
             <Image source={profilePlaceHolder} style={styles.ProfileImage} />
           </View>
           <View style={styles.ProfileTextContainer}>
-            <Heading2Text style={styles.ProfileText}>Username</Heading2Text>
-            <BodyText style={styles.ProfileText}>Posted 21 days ago</BodyText>
+            <Heading2Text style={styles.ProfileText}>
+              {props.username}
+            </Heading2Text>
+            <BodyText style={styles.ProfileText}>
+              {`Posted ${props.postDate}`}
+            </BodyText>
           </View>
         </View>
       ) : (
-        <Image source={logo} style={[styles.Logo, styles.Logo, props.style]} />
+        <Image
+          source={props.userImage ? props.userImage : logo}
+          style={[styles.Logo, styles.Logo, props.style]}
+        />
       )}
     </View>
   );

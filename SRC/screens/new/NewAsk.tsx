@@ -89,6 +89,7 @@ export default function NewAsk(this: any) {
           onChangeText={(text: number) => {
             handleChange('expiry', text);
           }}
+          inputMode="numeric"
           textStyle={styles.Expiry}
           style={styles.ExpiryView}>
           {newAskData.expiry}
@@ -96,12 +97,16 @@ export default function NewAsk(this: any) {
       </View>
       <View style={styles.ContentView}>
         <Heading2Text>Ask</Heading2Text>
-        <BaseInputComponent
-          onChangeText={(text: string) => handleChange('message', text)}
-          numberOfLines={7}
-          style={styles.Ask}>
-          {newAskData.message}
-        </BaseInputComponent>
+        <View style={styles.AskContainer}>
+          <BaseInputComponent
+            onChangeText={(text: string) => handleChange('message', text)}
+            multiline={true}
+            autoFocus={true}
+            textStyle={styles.AskText}
+            style={styles.Ask}>
+            {newAskData.message}
+          </BaseInputComponent>
+        </View>
       </View>
       <View style={styles.ContentView}>
         <Heading2Text>Categories</Heading2Text>
@@ -145,15 +150,33 @@ const styles = StyleSheet.create({
   },
   ExpiryView: {
     width: 50,
+    textAlign: 'center',
+    paddingLeft: 0,
   },
   Expiry: {
+    fontSize: whotheme.fontSize.medium,
     color: whotheme.colors.tertiary,
+  },
+  AskContainer: {
+    borderWidth: 1,
+    borderColor: whotheme.colors.secondary,
+    borderRadius: 12,
+    minHeight: 100,
   },
   Ask: {
     alignItems: 'flex-start',
     justifyContent: 'flex-end',
-    paddingTop: 0,
-    paddingBottom: 0,
+    borderWidth: 0,
+    borderBottomColor: '#a0a0a0',
+    borderBottomWidth: 1,
+    borderRadius: 0,
+    paddingLeft: 0,
+    marginLeft: 16,
+    marginRight: 16,
+    borderStyle: 'dotted',
+  },
+  AskText: {
+    // paddingBottom: 0,
   },
   Categories: {
     flexDirection: 'row',

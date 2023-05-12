@@ -14,11 +14,30 @@ import {ActionButton} from '../../components/baseButtonComponents/actionButton/A
 import {useNavigation} from '@react-navigation/core';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RouteStackParams} from '../../global/types';
+import auth from '@react-native-firebase/auth';
+import {GoogleSignin} from '@react-native-google-signin/google-signin';
+// import {auth} from '../../firebase/firebaseConfig';
 const logo = require('../../images/whoget_green.png');
 const facebook = require('../../images/icons/facebook.png');
 const google = require('../../images/icons/google.png');
 
 export default function Auth() {
+  GoogleSignin.configure({
+    webClientId:
+      '676597152690-fvpb5vccfeocca13qafru15ep859sqek.apps.googleusercontent.com',
+  });
+  //
+  async function onGoogleButtonPress() {
+    // Check if your device supports Google Play
+    await GoogleSignin.hasPlayServices({showPlayServicesUpdateDialog: true});
+    // Get the users ID token
+    const {idToken} = await GoogleSignin.signIn();
+    // Create a Google credential with the token
+    const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+    // Sign-in the user with the credential
+    return auth().signInWithCredential(googleCredential);
+  }
+  //
   const navigation =
     useNavigation<NativeStackNavigationProp<RouteStackParams>>();
   useEffect(() => {
@@ -26,15 +45,24 @@ export default function Auth() {
   }, [navigation]);
   const [busy, setBusy] = useState<boolean>(false);
   const handleSkip = () => {
+    navigation.push('AsksNav');
+  };
+  // const provider = new GoogleAuthProvider();
+  const handleGoogleAuth = async () => {
+    console.log('trying to authenticate...');
     setBusy(true);
-    setTimeout(() => {
-      navigation.push('AsksNav');
-    }, 500);
+    try {
+      onGoogleButtonPress()
+        .then(results => console.log(results))
+        .catch(error => console.log(error));
+    } catch (error) {
+      console.log('an error occured');
+      console.log(error);
+    } finally {
+      setBusy(false);
+    }
   };
   const handleFacebookAuth = () => {
-    setBusy(true);
-  };
-  const handleGoogleAuth = () => {
     setBusy(true);
     //FIXME: remove setTimeout
     setTimeout(() => {
@@ -54,6 +82,12 @@ export default function Auth() {
           <Image source={facebook} style={styles.Icon} />
         </Pressable>
         <Pressable onPress={handleGoogleAuth}>
+          {/* <Pressable
+          onPress={() =>
+            onGoogleButtonPress().then(() =>
+              console.log('Signed in with Google!'),
+            )
+          }> */}
           <Image source={google} style={styles.Icon} />
         </Pressable>
       </View>

@@ -41,8 +41,7 @@ export default function AskCard(props: AskCardProps) {
         <View style={styles.BodyTextView}>
           <View style={styles.BodyTextInfoView}>
             <Heading2Text>{props.username}</Heading2Text>
-            <BodyText
-              style={styles.DateText}>{`${props.expiry} days`}</BodyText>
+            <BodyText style={styles.DateText}>{`${props.expiry}`}</BodyText>
           </View>
           <BodyText>{props.message}</BodyText>
         </View>

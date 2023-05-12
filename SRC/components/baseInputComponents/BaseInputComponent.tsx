@@ -1,27 +1,27 @@
 import React from 'react';
-import {StyleSheet} from 'react-native';
+import {InputModeOptions, StyleSheet} from 'react-native';
 import {whotheme} from '../../global/variables';
 import {TextInput} from 'react-native-gesture-handler';
 import BodyText from '../baseTextComponents/bodyText/BodyText';
 
 export default function BaseInputComponent(props: {
   style?: {};
-  rows?: number;
+  multiline?: boolean;
   onChangeText: any;
   numberOfLines?: number;
   children?: string | number;
   textStyle?: {};
+  inputMode?: InputModeOptions;
+  autoFocus?: boolean;
 }) {
   return (
     <TextInput
       style={[styles.defaultStyle, props.style]}
       onChangeText={props.onChangeText}
-      multiline={
-        props.numberOfLines !== undefined && props.numberOfLines > 1
-          ? true
-          : false
-      }
+      multiline={props.multiline}
       numberOfLines={props.numberOfLines ? props.numberOfLines : 1}
+      inputMode={props.inputMode}
+      autoFocus={props.autoFocus}
       selectionColor={whotheme.colors.tertiary}>
       <BodyText style={props.textStyle}>{`${props.children}`}</BodyText>
     </TextInput>

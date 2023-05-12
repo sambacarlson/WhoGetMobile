@@ -4,7 +4,7 @@ export type RouteStackParams = {
   AsksNav: undefined;
   Auth: undefined;
   Interests: undefined;
-  Respond: undefined;
+  Respond: any;
   Contact: undefined;
   NewAsk: undefined;
   EditAsk: undefined;

@@ -1,5 +1,11 @@
 import React, {useEffect, useState} from 'react';
-import {ActivityIndicator, StatusBar, StyleSheet, View} from 'react-native';
+import {
+  ActivityIndicator,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  View,
+} from 'react-native';
 import AskCard from '../../components/compoundComponents/AskCard';
 import {useNavigation} from '@react-navigation/core';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -9,6 +15,7 @@ import {useAppDispatch, useAppSelector} from '../../redux/redux_store/hooks';
 import {askType} from '../../redux/services/types';
 import {fetchAsks} from '../../redux/services/requests';
 import BodyText from '../../components/baseTextComponents/bodyText/BodyText';
+import {formatDistanceToNow} from 'date-fns';
 
 export default function AllAsks() {
   const dispatch = useAppDispatch();
@@ -17,19 +24,19 @@ export default function AllAsks() {
     useNavigation<NativeStackNavigationProp<RouteStackParams>>();
   //get asks
   const asks = useAppSelector(state => state.ask);
+  const [asksData, setAsksData] = useState<askType[]>(asks.asks);
   //fetch on mount
   useEffect(() => {
-    dispatch(fetchAsks());
+    dispatch(fetchAsks()).then(response => setAsksData(response.payload));
   }, [dispatch]);
   //states
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [asksData, setAsksData] = useState<askType[]>(asks.asks);
-  console.log(asksData);
+  // console.log(asksData);
   //methods
 
   //return
   return (
-    <View style={styles.Container}>
+    <ScrollView style={styles.Container}>
       <StatusBar
         backgroundColor={whotheme.colors.primary}
         barStyle={'light-content'}
@@ -53,14 +60,14 @@ export default function AllAsks() {
         asksData.map(ask => (
           <AskCard
             key={ask._id}
-            // onPress={() => navigation.navigate('Respond')}
+            onPress={() => navigation.navigate('Respond', {askId: ask._id})}
             username={ask.userInfo.username}
-            onPress={() => {}}
+            // onPress={() => {}}
             message={ask.message}
-            expiry={ask.expiry.toString()}
+            expiry={`${formatDistanceToNow(new Date(ask.createdAt))}`}
           />
         ))}
-    </View>
+    </ScrollView>
   );
 }
 
