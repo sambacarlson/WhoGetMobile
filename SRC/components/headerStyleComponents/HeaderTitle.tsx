@@ -10,8 +10,8 @@ type HeaderTitleProps = {
   style?: {};
   showProfile?: boolean;
   userImage?: string;
-  username: string;
-  postDate: string;
+  username?: string;
+  postDate?: string;
 };
 
 export default function HeaderTitle(props: HeaderTitleProps) {

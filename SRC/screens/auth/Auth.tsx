@@ -16,17 +16,21 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RouteStackParams} from '../../global/types';
 import auth from '@react-native-firebase/auth';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
+import {useAppDispatch} from '../../redux/redux_store/hooks';
+import {setUserAuth} from '../../redux/services/redux_slices/userAuthSlice';
 // import {auth} from '../../firebase/firebaseConfig';
 const logo = require('../../images/whoget_green.png');
-const facebook = require('../../images/icons/facebook.png');
+// const facebook = require('../../images/icons/facebook.png');
 const google = require('../../images/icons/google.png');
 
 export default function Auth() {
+  const dispatch = useAppDispatch();
+  // google signin configuration..
   GoogleSignin.configure({
     webClientId:
       '676597152690-fvpb5vccfeocca13qafru15ep859sqek.apps.googleusercontent.com',
   });
-  //
+  //handle google sign in procedure
   async function onGoogleButtonPress() {
     // Check if your device supports Google Play
     await GoogleSignin.hasPlayServices({showPlayServicesUpdateDialog: true});
@@ -47,13 +51,30 @@ export default function Auth() {
   const handleSkip = () => {
     navigation.push('AsksNav');
   };
-  // const provider = new GoogleAuthProvider();
+  // handle google sign in button press.
   const handleGoogleAuth = async () => {
     console.log('trying to authenticate...');
     setBusy(true);
     try {
       onGoogleButtonPress()
-        .then(results => console.log(results))
+        .then(userObj => {
+          const {uid, email, displayName, photoURL} = userObj.user;
+          dispatch(
+            setUserAuth({
+              uid,
+              email,
+              username: displayName,
+              photo: photoURL,
+            }),
+          );
+          /** check if user already has an account */
+          if (userObj.additionalUserInfo?.isNewUser) {
+            navigation.navigate('Interests');
+          } else {
+            navigation.navigate('Interests');
+            // navigation.navigate('AsksNav');
+          }
+        })
         .catch(error => console.log(error));
     } catch (error) {
       console.log('an error occured');
@@ -62,6 +83,7 @@ export default function Auth() {
       setBusy(false);
     }
   };
+  /**
   const handleFacebookAuth = () => {
     setBusy(true);
     //FIXME: remove setTimeout
@@ -69,6 +91,7 @@ export default function Auth() {
       navigation.push('Interests');
     }, 500);
   };
+  */
 
   return (
     <View style={styles.container}>
@@ -78,9 +101,9 @@ export default function Auth() {
         continue with ...
       </Heading2Text>
       <View style={styles.IconsContainer}>
-        <Pressable onPress={handleFacebookAuth}>
+        {/* <Pressable onPress={handleFacebookAuth}>
           <Image source={facebook} style={styles.Icon} />
-        </Pressable>
+        </Pressable> */}
         <Pressable onPress={handleGoogleAuth}>
           {/* <Pressable
           onPress={() =>
@@ -144,9 +167,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   SkipButton: {
+    width: '100%',
     paddingHorizontal: 8,
-    paddingVertical: 4,
-    alignSelf: 'flex-end',
+    paddingVertical: 3,
+    // alignSelf: 'flex-end',
     marginTop: 16,
   },
 });

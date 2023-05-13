@@ -7,5 +7,5 @@ export type RouteStackParams = {
   Respond: any;
   Contact: undefined;
   NewAsk: undefined;
-  EditAsk: undefined;
+  EditAsk: any;
 };

@@ -19,6 +19,9 @@ export default function AsksNav() {
       <HeaderRight onPressNewAsk={() => navigation.navigate('NewAsk')} />
     ),
   });
+  /************* */
+
+  /************* */
   return (
     <Tab.Navigator
       initialRouteName="AllAsks"

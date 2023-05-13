@@ -10,6 +10,8 @@ import {useNavigation} from '@react-navigation/core';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RouteStackParams} from '../../global/types';
 import {whotheme} from '../../global/variables';
+import {useAppDispatch} from '../../redux/redux_store/hooks';
+import {setUserAuth} from '../../redux/services/redux_slices/userAuthSlice';
 
 // TODO: remove allCategories array. replace with actual data
 const categories = [
@@ -25,8 +27,10 @@ const categories = [
 ];
 
 export default function Interests() {
+  const dispatch = useAppDispatch();
   const navigation =
     useNavigation<NativeStackNavigationProp<RouteStackParams>>();
+  const [busy, setBusy] = useState<boolean>(false);
   const [chosenCategories, setChosenCategories] = useState<string[]>([]);
   const [allCategories, setAllCategories] = useState<string[]>(categories);
 
@@ -45,6 +49,16 @@ export default function Interests() {
     });
   };
 
+  const handleContinue = () => {
+    setBusy(true);
+    dispatch(
+      setUserAuth({
+        interests: chosenCategories,
+      }),
+    );
+    setBusy(false);
+    navigation.navigate('Contact');
+  };
   //Return
   return (
     <SafeAreaView style={styles.Container}>
@@ -89,8 +103,8 @@ export default function Interests() {
         </View>
       </ScrollView>
       <ActionButton
-        onPress={() => navigation.navigate('Contact')}
-        busy={false}
+        onPress={handleContinue}
+        busy={busy}
         style={styles.ActionButton}>
         Continue
       </ActionButton>
