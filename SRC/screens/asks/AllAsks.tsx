@@ -18,6 +18,7 @@ import {fetchAsks} from '../../redux/services/requests';
 import BodyText from '../../components/baseTextComponents/bodyText/BodyText';
 import {formatDistanceToNow} from 'date-fns';
 import {getUid} from '../../global/functions';
+import {fetchUser} from '../../redux/services/redux_slices/userSlice';
 
 export default function AllAsks() {
   const dispatch = useAppDispatch();
@@ -27,25 +28,45 @@ export default function AllAsks() {
   const asks = useAppSelector(state => state.ask);
   const [asksData, setAsksData] = useState<askType[]>(asks.asks);
   const [busy, setBusy] = useState<boolean>(false);
-  const [googleUid, setGoogleUid] = useState<string | null>('');
+  // const [googleUid, setGoogleUid] = useState<string | null>('');
+  const [error, setError] = useState<string>('');
 
-  getUid().then(value => {
-    setGoogleUid(value);
-  });
-  /**fetch on mount*/
+  //get google id from local storage.
   useEffect(() => {
     setBusy(true);
-    console.log('uid===>>', googleUid);
-    try {
-      dispatch(fetchAsks()).then(response => setAsksData(response.payload));
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setBusy(false);
-    }
-  }, [dispatch, googleUid]);
-  //states
-
+    setError('');
+    // get local id.
+    getUid().then(value => {
+      // setGoogleUid(value);
+      //if a local id exists
+      if (value !== null) {
+        // fetch the user who owns the id
+        dispatch(fetchUser(value))
+          .then(userInfo => {
+            //then fetch asks categorized by that user's interets
+            dispatch(fetchAsks([...userInfo.payload.interests])).then(askList =>
+              // set Ask data for this component(screen.)
+              setAsksData(askList.payload),
+            );
+          })
+          .catch(err => {
+            setError(`${err}`);
+            setBusy(false);
+          });
+        //if no id exists in local storage
+      } else {
+        // fetch all asks uncategorized
+        dispatch(fetchAsks([]))
+          .then(askList => setAsksData(askList.payload))
+          .catch(err => {
+            setError(`${err}`);
+            setBusy(false);
+          });
+      }
+    });
+    setBusy(false);
+    setError('');
+  }, [dispatch]);
   // console.log(asksData);
   //methods
   console.log(asksData);
@@ -69,8 +90,13 @@ export default function AllAsks() {
         </View>
       )}
       {asks.error && (
-        <View style={styles.ErrorContainer}>
+        <View style={styles.AsksErrorContainer}>
           <BodyText>{asks.error}</BodyText>
+        </View>
+      )}
+      {error && (
+        <View style={styles.ErrorErrorContainer}>
+          <BodyText>{error}</BodyText>
         </View>
       )}
       {!asks.loading && !asks.error && !asksData && (
@@ -117,8 +143,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  ErrorContainer: {
+  AsksErrorContainer: {
     position: 'absolute',
+    zIndex: 20,
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  ErrorErrorContainer: {
+    position: 'absolute',
+    paddingTop: 50,
     zIndex: 20,
     width: '100%',
     height: '100%',

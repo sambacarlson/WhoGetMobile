@@ -24,10 +24,11 @@ export default function MyAsks() {
   //get asks
   const allAsks = useAppSelector(state => state.ask);
   const thisUser = useAppSelector(state => state.user); //the dispatch to get this user is made on allAsks screen
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [asksData, setAsksData] = useState<askType[]>(
-    allAsks.asks.filter(a => a.userInfo.user_id === thisUser.user._id),
+  const filteredAsks = allAsks.asks.filter(
+    ask => ask.userInfo.user_id === thisUser.user._id,
   );
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [asksData, setAsksData] = useState<askType[]>(filteredAsks);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [busy, setBusy] = useState<boolean>(false);
   // const [googleUid, setGoogleUid] = useState<string | null>('');
@@ -60,18 +61,18 @@ export default function MyAsks() {
         backgroundColor={whotheme.colors.primary}
         barStyle={'light-content'}
       />
-      {busy && (
+      {(busy || allAsks.loading) && (
         <View style={styles.LoadingContainer}>
           <ActivityIndicator size={'large'} color={whotheme.colors.tertiary} />
         </View>
       )}
-      {false && (
+      {allAsks.error && (
         <View style={styles.ErrorContainer}>
-          <BodyText>{'an error occured'}</BodyText>
+          <BodyText>{allAsks.error}</BodyText>
         </View>
       )}
       {/* {!busy && !asksData && ( */}
-      {true && (
+      {!(asksData.length > 0) && (
         <View style={styles.LoadingContainer}>
           <BodyText>{'No asks to show right now ☹️'}</BodyText>
         </View>
@@ -113,6 +114,7 @@ const styles = StyleSheet.create({
   },
   ErrorContainer: {
     position: 'absolute',
+    paddingTop: 50,
     zIndex: 20,
     width: '100%',
     height: '100%',

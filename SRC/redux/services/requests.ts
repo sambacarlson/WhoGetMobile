@@ -2,11 +2,17 @@ import {createAsyncThunk} from '@reduxjs/toolkit';
 import axios from 'axios';
 
 //get request
-export const fetchAsks = createAsyncThunk('ask/fetchAsks', () => {
-  return axios
-    .get('https://whoget-api.onrender.com/api/asks')
-    .then(response => response.data);
-});
+export const fetchAsks = createAsyncThunk(
+  'ask/fetchAsks',
+  async (categories?: string[]) => {
+    console.log(categories);
+    return axios
+      .get('https://whoget-api.onrender.com/api/asks', {
+        params: {categories: categories?.join(',')},
+      })
+      .then(response => response.data);
+  },
+);
 
 //post request
 export const createAsks = createAsyncThunk(

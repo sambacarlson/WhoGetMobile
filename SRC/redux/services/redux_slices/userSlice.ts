@@ -23,9 +23,11 @@ const initialState: userAsyncState = {
 // get single user
 export const fetchUser = createAsyncThunk(
   'user/fetchUsers',
-  (google_id: string) => {
+  async (params: {userAuthId?: string; userDbId?: string}) => {
     return axios
-      .get(`https://whoget-api.onrender.com/api/users${google_id}`)
+      .get('https://whoget-api.onrender.com/api/users', {
+        params: {...params},
+      })
       .then(response => response.data);
   },
 );

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   StyleSheet,
   ScrollView,
@@ -19,28 +19,38 @@ import {useNavigation} from '@react-navigation/core';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RouteStackParams} from '../../global/types';
 import HeaderTitle from '../../components/headerStyleComponents/HeaderTitle';
-import HeaderLeft from '../../components/headerStyleComponents/HeaderLeft';
-import {useAppSelector} from '../../redux/redux_store/hooks';
-import {askType} from '../../redux/services/types';
-import {formattedDate} from '../../global/functions';
-import {formatDistanceToNow} from 'date-fns';
+// import HeaderLeft from '../../components/headerStyleComponents/HeaderLeft';
+import {useAppDispatch, useAppSelector} from '../../redux/redux_store/hooks';
+import {askType, userType} from '../../redux/services/types';
+import {formattedDate, getUid} from '../../global/functions';
+// import {formatDistanceToNow} from 'date-fns';
+import {fetchUser} from '../../redux/services/redux_slices/userSlice';
 
 export default function Respond({route}) {
   const {askId} = route.params;
-  // const dispatch = useAppDispatch();
-  // useEffect(() => {
-  //  // dispatch(fetchUsers());
-  // }, [dispatch]);
+  const dispatch = useAppDispatch();
+  const [thisUser, setThisUser] = useState<userType>();
   const thisAsk: askType = useAppSelector(
     state => state.ask.asks.filter(ask => ask._id === askId)[0],
   );
+  //user who wants to respond must be logged In
+  getUid().then(uid => {
+    uid === null && navigation.navigate('Auth');
+  });
+  // useEffect
+  useEffect(() => {
+    // user who created the ask
+    dispatch(fetchUser({userDbId: thisAsk.userInfo.user_id})).then(user =>
+      setThisUser(user.payload),
+    );
+  }, [dispatch, thisAsk.userInfo.user_id]);
   // const thisUsers = useAppSelector(state => state.user.users);
   // console.log(thisUser);
-  const thisUser = {
-    telephone: 677964952,
-    whatsapp: 677964952,
-    email: 'sambacarlson@yahoo.com',
-  };
+  // const thisUser = {
+  //   telephone: 677964952,
+  //   whatsapp: 677964952,
+  //   email: 'sambacarlson@yahoo.com',
+  // };
   const navigation =
     useNavigation<NativeStackNavigationProp<RouteStackParams>>();
   navigation.setOptions({
@@ -52,7 +62,6 @@ export default function Respond({route}) {
         postDate={`${formattedDate(thisAsk.createdAt)}`}
       />
     ),
-    // eslint-disable-next-line react/no-unstable-nested-components
     // headerLeft: () => <HeaderLeft onPress={() => navigation.pop()} />,
   });
   return (
@@ -76,11 +85,11 @@ export default function Respond({route}) {
       <View style={styles.ReplyButtonsView}>
         <Pressable
           onPress={() => {
-            Linking.openURL(`tel:${thisUser.telephone}`);
+            thisUser && Linking.openURL(`tel:${thisUser.telephone}`);
           }}>
           <Image source={telephone} style={styles.ReplyButton} />
         </Pressable>
-        {thisUser.whatsapp && (
+        {thisUser && thisUser.whatsapp && (
           <Pressable
             onPress={() => {
               Linking.openURL(
@@ -90,7 +99,7 @@ export default function Respond({route}) {
             <Image source={whatsapp} style={styles.ReplyButton} />
           </Pressable>
         )}
-        {thisUser.email && (
+        {thisUser && thisUser.email && (
           <Pressable
             onPress={() => {
               Linking.openURL(

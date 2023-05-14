@@ -1,29 +1,44 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {StyleSheet, ScrollView, View, Image} from 'react-native';
 import Heading2Text from '../../components/baseTextComponents/heading2Text/Heading2Text';
 import BaseInputComponent from '../../components/baseInputComponents/BaseInputComponent';
 import {whotheme} from '../../global/variables';
 import CategoryButton from '../../components/baseButtonComponents/categoryButton/CategoryButton';
 import {ActionButton} from '../../components/baseButtonComponents/actionButton/ActionButton';
-import {useAppDispatch} from '../../redux/redux_store/hooks';
+import {useAppDispatch, useAppSelector} from '../../redux/redux_store/hooks';
 import {createAsks} from '../../redux/services/requests';
+import {useNavigation} from '@react-navigation/core';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {RouteStackParams} from '../../global/types';
 import axios from 'axios';
+import {getUid} from '../../global/functions';
 
-const allMyInterests = [
-  'Health',
-  'Nature',
-  'Culture',
-  'Science',
-  'Education',
-  'Entertainment',
-];
+// const allMyInterests = [
+//   'Health',
+//   'Nature',
+//   'Culture',
+//   'Science',
+//   'Education',
+//   'Entertainment',
+// ];
 
 const askImage = require('../../images/icons/image_add.png');
 
 export default function NewAsk(this: any) {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RouteStackParams>>();
   const dispatch = useAppDispatch();
-
   const [isBusy, setIsBusy] = useState<boolean>(false);
+  //use effect
+  useEffect(() => {
+    getUid().then(uid => {
+      if (uid === null) {
+        navigation.navigate('Auth');
+      }
+    });
+  }, [navigation]);
+  const thisUser = useAppSelector(state => state.user.user);
+  const allMyInterests = thisUser.interests;
   /**Pick categories */
   // const [categories, setCategories] = useState<string[]>([]);
   const toggleCategory = (category: string) => {
@@ -45,9 +60,9 @@ export default function NewAsk(this: any) {
   //form
   const defaultAskData = {
     userInfo: {
-      user_id: 't3r45sfe32',
-      username: 'dummyuser',
-      photo: '',
+      user_id: thisUser._id,
+      username: thisUser.username,
+      photo: thisUser.photo,
     },
     message: '',
     categories: [],
@@ -78,7 +93,7 @@ export default function NewAsk(this: any) {
     }
     setIsBusy(false);
   };
-  console.log(newAskData);
+  // console.log(newAskData);
 
   //return
   return (
