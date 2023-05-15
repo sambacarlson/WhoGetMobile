@@ -5,13 +5,14 @@ import BaseInputComponent from '../../components/baseInputComponents/BaseInputCo
 import {whotheme} from '../../global/variables';
 import CategoryButton from '../../components/baseButtonComponents/categoryButton/CategoryButton';
 import {ActionButton} from '../../components/baseButtonComponents/actionButton/ActionButton';
-import {useAppDispatch, useAppSelector} from '../../redux/redux_store/hooks';
-import {createAsks} from '../../redux/services/requests';
+import {useAppSelector} from '../../redux/redux_store/hooks';
+// import {createAsks} from '../../redux/services/requests';
 import {useNavigation} from '@react-navigation/core';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RouteStackParams} from '../../global/types';
 import axios from 'axios';
 import {getUid} from '../../global/functions';
+import {askType} from '../../redux/services/types';
 
 // const allMyInterests = [
 //   'Health',
@@ -27,7 +28,7 @@ const askImage = require('../../images/icons/image_add.png');
 export default function NewAsk(this: any) {
   const navigation =
     useNavigation<NativeStackNavigationProp<RouteStackParams>>();
-  const dispatch = useAppDispatch();
+  // const dispatch = useAppDispatch();
   const [isBusy, setIsBusy] = useState<boolean>(false);
   //use effect
   useEffect(() => {
@@ -41,6 +42,22 @@ export default function NewAsk(this: any) {
   const allMyInterests = thisUser.interests;
   /**Pick categories */
   // const [categories, setCategories] = useState<string[]>([]);
+  //form
+  const defaultAskData = {
+    userInfo: {
+      user_id: thisUser._id,
+      username: thisUser.username,
+      photo: thisUser.photo,
+    },
+    message: '',
+    categories: [],
+    expiry: 1,
+    status: {
+      hidden: false,
+      hiddenDate: '',
+    },
+  };
+  const [newAskData, setNewAskData] = useState<askType>(defaultAskData);
   const toggleCategory = (category: string) => {
     if (newAskData.categories.includes(category)) {
       // setCategories(categories.filter(c => c !== category));
@@ -57,22 +74,6 @@ export default function NewAsk(this: any) {
     }
     // console.log(categories);
   };
-  //form
-  const defaultAskData = {
-    userInfo: {
-      user_id: thisUser._id,
-      username: thisUser.username,
-      photo: thisUser.photo,
-    },
-    message: '',
-    categories: [],
-    expiry: 1,
-    status: {
-      hidden: false,
-      hiddenDate: '',
-    },
-  };
-  const [newAskData, setNewAskData] = useState(defaultAskData);
   //methods
   const handleChange = (name: string, value: any) => {
     setNewAskData(prevData => ({...prevData, [name]: value}));
@@ -86,7 +87,9 @@ export default function NewAsk(this: any) {
         'https://whoget-api.onrender.com/api/asks',
         newAskData,
       );
-      console.log('response ======>>>', response.data);
+      // console.log('response ======>>>', response.data);
+      setIsBusy(false);
+      navigation.navigate('AsksNav');
       return response.data;
     } catch (error) {
       console.warn(error);

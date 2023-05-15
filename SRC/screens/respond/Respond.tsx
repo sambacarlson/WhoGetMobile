@@ -60,6 +60,7 @@ export default function Respond({route}) {
         showProfile={true}
         username={thisAsk.userInfo.username}
         postDate={`${formattedDate(thisAsk.createdAt)}`}
+        profilePicture={thisAsk.userInfo.photo}
       />
     ),
     // headerLeft: () => <HeaderLeft onPress={() => navigation.pop()} />,
@@ -103,7 +104,11 @@ export default function Respond({route}) {
           <Pressable
             onPress={() => {
               Linking.openURL(
-                `mailto:${thisUser.email}?subject=Reply to your ${thisAsk.updatedAt}ask on whoget&body=Hello`,
+                `mailto:${
+                  thisUser.email
+                }?subject=Reply to your ask on whoget from ${formattedDate(
+                  thisAsk.updatedAt,
+                )}&body=Hello`,
               );
             }}>
             <Image source={email} style={styles.ReplyButton} />

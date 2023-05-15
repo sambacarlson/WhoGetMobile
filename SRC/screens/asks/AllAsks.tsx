@@ -41,7 +41,7 @@ export default function AllAsks() {
       //if a local id exists
       if (value !== null) {
         // fetch the user who owns the id
-        dispatch(fetchUser(value))
+        dispatch(fetchUser({userAuthId: value}))
           .then(userInfo => {
             //then fetch asks categorized by that user's interets
             dispatch(fetchAsks([...userInfo.payload.interests])).then(askList =>
@@ -116,6 +116,7 @@ export default function AllAsks() {
               key={ask._id}
               onPress={() => navigation.navigate('Respond', {askId: ask._id})}
               username={ask.userInfo.username}
+              profilePhoto={ask.userInfo.photo}
               // onPress={() => {}}
               message={ask.message}
               expiry={`${formatDistanceToNow(new Date(ask.createdAt))}`}

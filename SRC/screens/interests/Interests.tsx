@@ -13,6 +13,7 @@ import {whotheme} from '../../global/variables';
 import {useAppDispatch} from '../../redux/redux_store/hooks';
 import {setUserAuth} from '../../redux/services/redux_slices/userAuthSlice';
 import {defaultInterests} from './interetsList';
+import {v4 as uuidv4} from 'uuid';
 
 // TODO: remove allCategories array. replace with actual data
 const categories = [...defaultInterests];
@@ -68,7 +69,8 @@ export default function Interests() {
                 {/* here map over chosen interests and display */}
                 {chosenCategories.map(category => (
                   <CategoryButton
-                    key={chosenCategories.indexOf(category) + category}
+                    // key={chosenCategories.indexOf(category) + category}
+                    key={uuidv4()}
                     onPress={() => handleRemoveInterest(category)}>
                     {category}
                   </CategoryButton>

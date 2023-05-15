@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
   SafeAreaView,
@@ -23,12 +23,20 @@ export default function MyAsks() {
     useNavigation<NativeStackNavigationProp<RouteStackParams>>();
   //get asks
   const allAsks = useAppSelector(state => state.ask);
-  const thisUser = useAppSelector(state => state.user); //the dispatch to get this user is made on allAsks screen
-  const filteredAsks = allAsks.asks.filter(
-    ask => ask.userInfo.user_id === thisUser.user._id,
-  );
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [asksData, setAsksData] = useState<askType[]>(filteredAsks);
+  const thisUser = useAppSelector(state => state.user);
+  console.log('thisuserId;', thisUser.user._id);
+  const [asksData, setAsksData] = useState<askType[]>([]);
+
+  //the dispatch to get this user is made on allAsks screen
+  useEffect(() => {
+    setAsksData([]); //this makes sure the asks don't duplicate on rerenders
+    allAsks.asks.map(ask => {
+      if ((ask.userInfo.user_id as string) === (thisUser.user._id as string)) {
+        setAsksData(prevAsks => [...prevAsks, ask]);
+      }
+    });
+  }, [allAsks.asks, thisUser.user._id]);
+  // console.log('all===>>', allAsks.asks.);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [busy, setBusy] = useState<boolean>(false);
   // const [googleUid, setGoogleUid] = useState<string | null>('');

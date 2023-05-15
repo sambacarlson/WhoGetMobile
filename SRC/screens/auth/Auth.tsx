@@ -71,7 +71,7 @@ export default function Auth() {
           if (userObj.additionalUserInfo?.isNewUser) {
             navigation.navigate('Interests');
           } else {
-            navigation.navigate('Interests');
+            navigation.navigate('AsksNav');
             // navigation.navigate('AsksNav');
           }
         })

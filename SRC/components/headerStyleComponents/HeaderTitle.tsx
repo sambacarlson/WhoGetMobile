@@ -12,6 +12,7 @@ type HeaderTitleProps = {
   userImage?: string;
   username?: string;
   postDate?: string;
+  profilePicture?: string;
 };
 
 export default function HeaderTitle(props: HeaderTitleProps) {
@@ -20,7 +21,14 @@ export default function HeaderTitle(props: HeaderTitleProps) {
       {props.showProfile ? (
         <View style={styles.ProfileContainer}>
           <View style={styles.ProfileImageContainer}>
-            <Image source={profilePlaceHolder} style={styles.ProfileImage} />
+            <Image
+              source={
+                props.profilePicture
+                  ? {uri: props.profilePicture}
+                  : profilePlaceHolder
+              }
+              style={styles.ProfileImage}
+            />
           </View>
           <View style={styles.ProfileTextContainer}>
             <Heading2Text style={styles.ProfileText}>
@@ -67,9 +75,9 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   ProfileImage: {
-    width: 30,
-    height: 30,
-    // borderRadius: 100,
+    width: 33,
+    height: 33,
+    borderRadius: 100,
     resizeMode: 'cover',
   },
   ProfileTextContainer: {

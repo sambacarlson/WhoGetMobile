@@ -3,7 +3,7 @@
  */
 
 export type askType = {
-  _id: string;
+  _id?: string;
   userInfo: {user_id: string; username: string; photo?: string};
   message: string;
   categories: string[];
