@@ -36,16 +36,22 @@ export default function Contact() {
   const [loading, setLoading] = useState<boolean>(false);
   const [formData, setFormData] = useState<{
     username?: string;
+    uid: string;
     whatsapp?: number;
     telephone?: number;
     email?: string;
     photo?: string;
+    interests?: string[];
+    status: {banned: boolean; bannedDate: string};
   }>({
     username: currentUserAuthState.username,
+    uid: currentUserAuthState.uid,
     whatsapp: currentUserAuthState.telephone,
     telephone: currentUserAuthState.telephone,
     email: currentUserAuthState.email,
     photo: currentUserAuthState.photo,
+    interests: currentUserAuthState.interests,
+    status: {banned: false, bannedDate: ''},
   });
 
   const handleFormChange = (name: string, value: string | number) => {
@@ -57,6 +63,8 @@ export default function Contact() {
     dispatch(setUserAuth(formData));
     try {
       await dispatch(createUser(formData));
+      // console.log('formData====>', formData);
+      // await axios.post('https://whoget-api.onrender.com/api/users', formData);
       await AsyncStorage.setItem('uid', currentUserAuthState.uid);
       navigation.navigate('AsksNav');
     } catch (error) {

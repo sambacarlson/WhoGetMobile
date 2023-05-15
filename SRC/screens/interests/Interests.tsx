@@ -12,19 +12,10 @@ import {RouteStackParams} from '../../global/types';
 import {whotheme} from '../../global/variables';
 import {useAppDispatch} from '../../redux/redux_store/hooks';
 import {setUserAuth} from '../../redux/services/redux_slices/userAuthSlice';
+import {defaultInterests} from './interetsList';
 
 // TODO: remove allCategories array. replace with actual data
-const categories = [
-  'Education',
-  'Health',
-  'Religion',
-  'Politics',
-  'Football',
-  'Science',
-  'Sports',
-  'Technology',
-  'Travel',
-];
+const categories = [...defaultInterests];
 
 export default function Interests() {
   const dispatch = useAppDispatch();

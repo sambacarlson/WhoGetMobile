@@ -33,7 +33,7 @@ export const fetchUser = createAsyncThunk(
 );
 export const createUser = createAsyncThunk(
   'user/createUser',
-  (userObject: any) => {
+  async (userObject: any) => {
     return axios
       .post('https://whoget-api.onrender.com/api/users', userObject)
       .then(response => response.data);
