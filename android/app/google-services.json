@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "676597152690",
+    "project_id": "whogetauth",
+    "storage_bucket": "whogetauth.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:676597152690:android:78668fd08240b4b489c2ab",
+        "android_client_info": {
+          "package_name": "com.whogetmobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "676597152690-625kukjqed9r8notlpargk47mm52rlj6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.whogetmobile",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "676597152690-fvpb5vccfeocca13qafru15ep859sqek.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCSy8ezm1iJnGENEo37_EugkOKCuEK3-CY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "676597152690-at8964te2j0okh0ld9bspi289sc8k91c.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

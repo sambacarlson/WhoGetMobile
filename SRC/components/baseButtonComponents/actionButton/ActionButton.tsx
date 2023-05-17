@@ -1,12 +1,19 @@
 import React from 'react';
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {whotheme} from '../../../global/variables';
 
 export function ActionButton(props: {
   onPress: any;
+  busy?: boolean;
   style?: {};
   textStyle?: {};
-  children: string;
+  children: any;
 }) {
   return (
     <TouchableOpacity
@@ -17,6 +24,7 @@ export function ActionButton(props: {
         <Text style={[styles.defaultTextStyle, props.textStyle]}>
           {props.children}
         </Text>
+        {props.busy && <ActivityIndicator color="white" />}
       </View>
     </TouchableOpacity>
   );
@@ -25,17 +33,22 @@ export function ActionButton(props: {
 const styles = StyleSheet.create({
   defaultContainerStyle: {
     backgroundColor: whotheme.colors.primaryLight,
-    flexDirection: 'column',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
     borderRadius: 1000,
+    padding: 12,
   },
   defaultViewStyle: {
-    flex: 1,
+    // flex: 1,
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
   },
   defaultTextStyle: {
     color: 'white',
-    padding: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     fontFamily: 'Montserrat-Bold',
   },
 });

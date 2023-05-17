@@ -1,11 +1,11 @@
 /** Main Stack Navigation*/
-export type RootStackParams = {
+export type RouteStackParams = {
   Splash: undefined;
-  Asks: undefined;
+  AsksNav: undefined;
   Auth: undefined;
   Interests: undefined;
-  Respond: undefined;
+  Respond: any;
   Contact: undefined;
   NewAsk: undefined;
-  EditAsk: undefined;
+  EditAsk: any;
 };
