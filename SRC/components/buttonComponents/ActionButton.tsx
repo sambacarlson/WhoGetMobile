@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {whotheme} from '../../../global/variables';
+import {whotheme} from '../../global/variables';
 
 export function ActionButton(props: {
   onPress: any;

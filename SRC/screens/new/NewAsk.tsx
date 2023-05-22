@@ -1,63 +1,49 @@
 import React, {useEffect, useState} from 'react';
-import {StyleSheet, ScrollView, View, Image} from 'react-native';
-import Heading2Text from '../../components/baseTextComponents/heading2Text/Heading2Text';
-import BaseInputComponent from '../../components/baseInputComponents/BaseInputComponent';
-import {whotheme} from '../../global/variables';
-import CategoryButton from '../../components/baseButtonComponents/categoryButton/CategoryButton';
-import {ActionButton} from '../../components/baseButtonComponents/actionButton/ActionButton';
-import {useAppSelector} from '../../redux/redux_store/hooks';
-// import {createAsks} from '../../redux/services/requests';
+import {StyleSheet, ScrollView, View} from 'react-native';
+import {BASE_URL, whotheme} from '../../global/variables';
 import {useNavigation} from '@react-navigation/core';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {RouteStackParams} from '../../global/types';
+import {RouteStackParams, userType} from '../../global/types';
 import axios from 'axios';
-import {getUid} from '../../global/functions';
-import {askType} from '../../redux/services/types';
+import {ActionButton} from '../../components/buttonComponents/ActionButton';
+import CategoryButton from '../../components/buttonComponents/CategoryButton';
+import BaseInputComponent from '../../components/imputComponents/BaseInputComponent';
+import Heading2Text from '../../components/textComponents/Heading2Text';
+import {getItemLocalStorage} from '../../global/functions';
+// import {useAppDispatch} from '../../redux/hooks';
+// import {createAsk} from '../../redux/slices/askSlice';
+import BodyText from '../../components/textComponents/BodyText';
 
-// const allMyInterests = [
-//   'Health',
-//   'Nature',
-//   'Culture',
-//   'Science',
-//   'Education',
-//   'Entertainment',
-// ];
-
-const askImage = require('../../images/icons/image_add.png');
+// const askImage = require('../../images/icons/image_add.png');
 
 export default function NewAsk(this: any) {
   const navigation =
     useNavigation<NativeStackNavigationProp<RouteStackParams>>();
   // const dispatch = useAppDispatch();
   const [isBusy, setIsBusy] = useState<boolean>(false);
-  //use effect
-  useEffect(() => {
-    getUid().then(uid => {
-      if (uid === null) {
-        navigation.navigate('Auth');
-      }
-    });
-  }, [navigation]);
-  const thisUser = useAppSelector(state => state.user.user);
-  const allMyInterests = thisUser.interests;
-  /**Pick categories */
-  // const [categories, setCategories] = useState<string[]>([]);
-  //form
-  const defaultAskData = {
-    userInfo: {
-      user_id: thisUser._id,
-      username: thisUser.username,
-      photo: thisUser.photo,
-    },
+  const [fault, setFault] = useState<string>('');
+  const [thisUser, setThisUser] = useState<userType>();
+
+  const allMyInterests = thisUser ? thisUser.interests : [];
+
+  // form
+  const defaultAskData: {
+    user: string;
+    message: string;
+    categories: string[];
+    expiry: number;
+    status: {hidden: boolean; hiddenDate?: string};
+  } = {
+    user: '',
     message: '',
     categories: [],
-    expiry: 1,
+    expiry: 3,
     status: {
       hidden: false,
       hiddenDate: '',
     },
   };
-  const [newAskData, setNewAskData] = useState<askType>(defaultAskData);
+  const [newAskData, setNewAskData] = useState(defaultAskData);
   const toggleCategory = (category: string) => {
     if (newAskData.categories.includes(category)) {
       // setCategories(categories.filter(c => c !== category));
@@ -80,23 +66,37 @@ export default function NewAsk(this: any) {
   };
   //submit
   const submitForm = async () => {
-    setIsBusy(true);
     try {
-      // await dispatch(createAsks(newAskData));
-      const response = await axios.post(
-        'https://whoget-api.onrender.com/api/asks',
-        newAskData,
-      );
-      // console.log('response ======>>>', response.data);
+      setFault('');
+      setIsBusy(true);
+      console.log('ask to create>>', {
+        ...newAskData,
+        expiry: Number(newAskData.expiry),
+        user: thisUser?._id,
+      });
+      const response = await axios.post(`${BASE_URL}/asks/one`, newAskData);
+      // dispatch(createAsk([...response.data]));
+      console.log('the just created asks===<>>', response.data);
       setIsBusy(false);
       navigation.navigate('AsksNav');
-      return response.data;
-    } catch (error) {
-      console.warn(error);
+      // return response.data;
+    } catch (error: any) {
+      setFault(error.message);
+      setIsBusy(false);
     }
-    setIsBusy(false);
   };
-  // console.log(newAskData);
+
+  //use effect
+  useEffect(() => {
+    setFault('');
+    getItemLocalStorage('@thisUser').then(results => {
+      setThisUser(results);
+      console.log('thisUser in effect >>>==>', results);
+      if (results === null) {
+        navigation.navigate('Auth');
+      }
+    });
+  }, [navigation]);
 
   //return
   return (
@@ -104,8 +104,8 @@ export default function NewAsk(this: any) {
       <View style={styles.ContentView}>
         <Heading2Text> Expiry (1 - 7 days)</Heading2Text>
         <BaseInputComponent
-          onChangeText={(text: number) => {
-            handleChange('expiry', text);
+          onChangeText={(num: number) => {
+            handleChange('expiry', num);
           }}
           inputMode="numeric"
           textStyle={styles.Expiry}
@@ -129,7 +129,7 @@ export default function NewAsk(this: any) {
       <View style={styles.ContentView}>
         <Heading2Text>Categories</Heading2Text>
         <View style={styles.Categories}>
-          {allMyInterests.map(interest => (
+          {allMyInterests.map((interest: string) => (
             <CategoryButton
               key={allMyInterests.indexOf(interest) + interest}
               setActiveState={true}
@@ -140,13 +140,17 @@ export default function NewAsk(this: any) {
         </View>
       </View>
       <View style={styles.ContentView}>
-        <Heading2Text>Upload an Image</Heading2Text>
+        {/* <Heading2Text>Upload an Image</Heading2Text> */}
         <View style={styles.AskImageView}>
-          <Image source={askImage} style={styles.AskImage} />
+          {/* <Image source={askImage} style={styles.AskImage} /> */}
         </View>
       </View>
+      {fault && <BodyText style={styles.Expiry}>{fault}</BodyText>}
       <View style={styles.ActionButtonView}>
-        <ActionButton onPress={!isBusy && submitForm} busy={isBusy}>
+        <ActionButton
+          onPress={!isBusy && submitForm}
+          busy={isBusy}
+          style={fault && styles.FaultOccured}>
           Done
         </ActionButton>
       </View>
@@ -204,8 +208,10 @@ const styles = StyleSheet.create({
   AskImageView: {
     alignItems: 'center',
     justifyContent: 'center',
-    height: 150,
-    backgroundColor: '#f0f0f0',
+    // height: 150,
+    height: 70,
+    // backgroundColor: '#f0f0f0',
+    backgroundColor: '#ffffff',
   },
   AskImage: {
     width: 40,
@@ -213,5 +219,8 @@ const styles = StyleSheet.create({
   },
   ActionButtonView: {
     paddingVertical: 32,
+  },
+  FaultOccured: {
+    backgroundColor: whotheme.colors.tertiary,
   },
 });

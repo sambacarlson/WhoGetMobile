@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -8,51 +8,46 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/core';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {RouteStackParams} from '../../global/types';
+import {RouteStackParams, tempUserType} from '../../global/types';
 import {ScrollView} from 'react-native-gesture-handler';
-import Heading1Text from '../../components/baseTextComponents/heading1Text/Heading1Text';
-import BodyText from '../../components/baseTextComponents/bodyText/BodyText';
-import Heading2Text from '../../components/baseTextComponents/heading2Text/Heading2Text';
-import BaseInputComponent from '../../components/baseInputComponents/BaseInputComponent';
-import {ActionButton} from '../../components/baseButtonComponents/actionButton/ActionButton';
+
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {whotheme} from '../../global/variables';
-import {useAppDispatch, useAppSelector} from '../../redux/redux_store/hooks';
-import {setUserAuth} from '../../redux/services/redux_slices/userAuthSlice';
-import {createUser} from '../../redux/services/redux_slices/userSlice';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import {BASE_URL, whotheme} from '../../global/variables';
+
+import {
+  getItemLocalStorage,
+  removeItemLocalStorage,
+  setItemLocalStorage,
+} from '../../global/functions';
+import {ActionButton} from '../../components/buttonComponents/ActionButton';
+import BaseInputComponent from '../../components/imputComponents/BaseInputComponent';
+import BodyText from '../../components/textComponents/BodyText';
+import Heading1Text from '../../components/textComponents/Heading1Text';
+import Heading2Text from '../../components/textComponents/Heading2Text';
+import axios from 'axios';
 
 const image_add = require('../../images/icons/image_add.png');
 
 export default function Contact() {
-  const dispatch = useAppDispatch();
   const navigation =
     useNavigation<NativeStackNavigationProp<RouteStackParams>>();
 
+  // const [tempThisUser, setTempThisUser] = useState<any>();
   const [busy, setBusy] = useState<boolean>(false);
-  const currentUserAuthState = useAppSelector(state => state.userAuth);
-  console.log('auth state ======>>>>>', currentUserAuthState);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [loading, setLoading] = useState<boolean>(false);
-  const [formData, setFormData] = useState<{
-    username?: string;
-    uid: string;
-    whatsapp?: number;
-    telephone?: number;
-    email?: string;
-    photo?: string;
-    interests?: string[];
-    status: {banned: boolean; bannedDate: string};
-  }>({
-    username: currentUserAuthState.username,
-    uid: currentUserAuthState.uid,
-    whatsapp: currentUserAuthState.telephone,
-    telephone: currentUserAuthState.telephone,
-    email: currentUserAuthState.email,
-    photo: currentUserAuthState.photo,
-    interests: currentUserAuthState.interests,
+  const [formData, setFormData] = useState<tempUserType>({
+    username: '',
+    oAuthId: '',
+    oAuthProvider: '',
+    whatsapp: 237,
+    telephone: 237,
+    email: '',
+    photo: '',
+    interests: [],
     status: {banned: false, bannedDate: ''},
   });
+  const [fault, setFault] = useState<boolean>(false);
 
   const handleFormChange = (name: string, value: string | number) => {
     setFormData(prevData => ({...prevData, [name]: value}));
@@ -60,20 +55,31 @@ export default function Contact() {
 
   const handleSave = async () => {
     setBusy(true);
-    dispatch(setUserAuth(formData));
+    setFault(false);
     try {
-      await dispatch(createUser(formData));
-      // console.log('formData====>', formData);
-      // await axios.post('https://whoget-api.onrender.com/api/users', formData);
-      await AsyncStorage.setItem('uid', currentUserAuthState.uid);
+      delete formData.isNewUser;
+      console.log('<<====FormData===>>', formData, '<<//////>>');
+      const user = await axios.post(`${BASE_URL}/users/one`, {...formData});
+      console.log('user====>>>', user.data);
+      await setItemLocalStorage('@thisUser', JSON.stringify(user.data));
+      await removeItemLocalStorage('@tempThisUser');
+      setBusy(false);
       navigation.navigate('AsksNav');
     } catch (error) {
-      console.log(error);
-      // navigation.navigate('AsksNav');
-    } finally {
       setBusy(false);
+      setFault(true);
+      console.log('error occured =====>> ', error);
     }
   };
+
+  useEffect(() => {
+    getItemLocalStorage('@tempThisUser').then(item => {
+      console.log('======>> formost', item);
+      setFormData(prev => ({...prev, ...item}));
+      console.log('=====>>>this next');
+    });
+  }, []);
+
   return (
     <SafeAreaView>
       <StatusBar
@@ -133,7 +139,10 @@ export default function Contact() {
             </View>
           </View>
           <View style={styles.ActionButton}>
-            <ActionButton onPress={handleSave} busy={busy}>
+            <ActionButton
+              onPress={handleSave}
+              busy={busy}
+              style={fault && styles.FaultOccured}>
               Save
             </ActionButton>
           </View>
@@ -174,5 +183,8 @@ const styles = StyleSheet.create({
   ImageAdd: {
     width: '100%',
     height: '100%',
+  },
+  FaultOccured: {
+    backgroundColor: whotheme.colors.tertiary,
   },
 });

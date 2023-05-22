@@ -1,8 +1,8 @@
 import React, {useState} from 'react';
 import {Image, Pressable, StyleSheet, View} from 'react-native';
-import BodyText from '../baseTextComponents/bodyText/BodyText';
-import Heading2Text from '../baseTextComponents/heading2Text/Heading2Text';
 import {whotheme} from '../../global/variables';
+import BodyText from '../textComponents/BodyText';
+import Heading2Text from '../textComponents/Heading2Text';
 
 const profilePlaceholderImage = require('../../images/icons/user.png');
 // const profilePlaceholderImage2 = require('../../images/icons/google.png');
@@ -55,9 +55,9 @@ const styles = StyleSheet.create({
   },
   CardContainer: {
     padding: 8,
-    gap: 9,
+    gap: 12,
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
   },
   ImageContainer: {
     width: 35,
@@ -72,6 +72,7 @@ const styles = StyleSheet.create({
   },
   BodyTextView: {
     flexDirection: 'column',
+    gap: 2,
     flex: 1,
   },
   BodyTextInfoView: {

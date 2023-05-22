@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {StyleSheet, TouchableOpacity} from 'react-native';
-import {whotheme} from '../../../global/variables';
-import BodyText from '../../baseTextComponents/bodyText/BodyText';
+import {whotheme} from '../../global/variables';
+import BodyText from '../textComponents/BodyText';
 export default function CategoryButton(props: {
   onPress: any;
   setActiveState?: boolean;

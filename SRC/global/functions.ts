@@ -27,13 +27,17 @@ export function formattedDate(isoTimestamp: string): string {
   return `${dayOfWeek}, ${month} ${day}, ${hours}:${minutes}`;
 }
 
-export async function getUid(key = 'uid') {
+export async function getItemLocalStorage(key: string) {
   let value: string | null = '';
   await AsyncStorage.getItem(key).then(val => (value = val));
-  return value;
+  return JSON.parse(value);
 }
-export async function setUid(key = 'uid', value: string) {
+export async function setItemLocalStorage(key: string, value: string) {
   await AsyncStorage.setItem(key, value);
+  return 0;
+}
+export async function removeItemLocalStorage(key: string) {
+  await AsyncStorage.removeItem(key);
   return 0;
 }
 export async function clearLocalStorage() {

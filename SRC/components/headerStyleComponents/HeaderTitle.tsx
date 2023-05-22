@@ -1,7 +1,7 @@
 import React from 'react';
 import {Image, StyleSheet, View} from 'react-native';
-import Heading2Text from '../baseTextComponents/heading2Text/Heading2Text';
-import BodyText from '../baseTextComponents/bodyText/BodyText';
+import BodyText from '../textComponents/BodyText';
+import Heading2Text from '../textComponents/Heading2Text';
 
 const logo = require('../../images/whoget_white.png');
 const profilePlaceHolder = require('../../images/icons/user.png');
@@ -32,7 +32,7 @@ export default function HeaderTitle(props: HeaderTitleProps) {
           </View>
           <View style={styles.ProfileTextContainer}>
             <Heading2Text style={styles.ProfileText}>
-              {props.username}
+              {props.username as string}
             </Heading2Text>
             <BodyText style={styles.ProfileText}>
               {`Posted ${props.postDate}`}

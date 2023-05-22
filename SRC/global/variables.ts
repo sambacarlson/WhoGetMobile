@@ -16,3 +16,8 @@ export const whotheme = {
     large: 24,
   },
 };
+
+export const BASE_URL = 'https://whoget-api.onrender.com/api';
+// export const BASE_URL = 'http://127.0.0.1:4000/api';
+// export const BASE_URL = 'http://192.168.8.100:4000/api';
+// export const BASE_URL = 'http://192.168.5.74:4000/api';

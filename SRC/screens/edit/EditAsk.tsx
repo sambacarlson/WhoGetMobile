@@ -1,13 +1,13 @@
 import React, {useState} from 'react';
 import {Image, StyleSheet, View} from 'react-native';
 import {ScrollView} from 'react-native-gesture-handler';
-import BodyText from '../../components/baseTextComponents/bodyText/BodyText';
 import {whotheme} from '../../global/variables';
-import {ActionButton} from '../../components/baseButtonComponents/actionButton/ActionButton';
 import {useNavigation} from '@react-navigation/core';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RouteStackParams} from '../../global/types';
 import HeaderLeft from '../../components/headerStyleComponents/HeaderLeft';
+import {ActionButton} from '../../components/buttonComponents/ActionButton';
+import BodyText from '../../components/textComponents/BodyText';
 const editButton = require('../../images/icons/edit.png');
 const deleteButton = require('../../images/icons/delete.png');
 const askImage = require('../../images/icons/image_add.png');

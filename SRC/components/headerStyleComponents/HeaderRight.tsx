@@ -1,7 +1,7 @@
 import React from 'react';
 import {Image, Pressable, StyleSheet, View} from 'react-native';
-import {ActionButton} from '../baseButtonComponents/actionButton/ActionButton';
 import {whotheme} from '../../global/variables';
+import {ActionButton} from '../buttonComponents/ActionButton';
 
 const menuIcon = require('../../images/icons/options.png');
 const searchIcon = require('../../images/icons/search.png');

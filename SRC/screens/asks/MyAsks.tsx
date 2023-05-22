@@ -10,94 +10,96 @@ import {
 import AskCard from '../../components/compoundComponents/AskCard';
 import {useNavigation} from '@react-navigation/core';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {RouteStackParams} from '../../global/types';
-import BodyText from '../../components/baseTextComponents/bodyText/BodyText';
-import {whotheme} from '../../global/variables';
-import {useAppSelector} from '../../redux/redux_store/hooks';
-import {askType} from '../../redux/services/types';
+import {RouteStackParams, askType} from '../../global/types';
+import {BASE_URL, whotheme} from '../../global/variables';
+
 import {formatDistanceToNow} from 'date-fns';
+import BodyText from '../../components/textComponents/BodyText';
+import {getItemLocalStorage} from '../../global/functions';
+import axios from 'axios';
 
 export default function MyAsks() {
   // const dispatch = useAppDispatch();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const navigation =
     useNavigation<NativeStackNavigationProp<RouteStackParams>>();
   //get asks
-  const allAsks = useAppSelector(state => state.ask);
-  const thisUser = useAppSelector(state => state.user);
-  console.log('thisuserId;', thisUser.user._id);
-  const [asksData, setAsksData] = useState<askType[]>([]);
-
-  //the dispatch to get this user is made on allAsks screen
-  useEffect(() => {
-    setAsksData([]); //this makes sure the asks don't duplicate on rerenders
-    allAsks.asks.map(ask => {
-      if ((ask.userInfo.user_id as string) === (thisUser.user._id as string)) {
-        setAsksData(prevAsks => [...prevAsks, ask]);
-      }
-    });
-  }, [allAsks.asks, thisUser.user._id]);
-  // console.log('all===>>', allAsks.asks.);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [busy, setBusy] = useState<boolean>(false);
-  // const [googleUid, setGoogleUid] = useState<string | null>('');
-  // console.log(googleUid);
-  // getUid().then(value => {
-  //   setGoogleUid(value);
-  // });
-  // clearLocalStorage().then(() => console.log('storage cleared'));
-  // /**fetch on mount*/
-  // useEffect(() => {
-  //   console.log('uid===>>', googleUid);
-  //   if (googleUid) {
-  //     dispatch(fetchUser(googleUid));
-  //   } else {
-  //     console.log('user not subscribed');
-  //     return;
-  //   }
-  //   try {
-  //     setBusy(true);
-  //     dispatch(fetchAsks()).then(response => setAsksData(response.payload));
-  //   } catch (error) {
-  //     console.log(error);
-  //   } finally {
-  //     setBusy(false);
-  //   }
-  // }, [dispatch, googleUid]);
+  const [fault, setFault] = useState<string>();
+  const [myAsk, setMyAsk] = useState<any>();
+  const [myId, setMyId] = useState<string>('');
+
+  useEffect(() => {
+    setBusy(true);
+    setFault('');
+    try {
+      getItemLocalStorage('@thisUser').then(thisUser => {
+        setMyId(thisUser._id);
+        axios
+          // .get(`${BASE_URL}/asks/many/byuser/${thisUser._id}`)
+          .get(`${BASE_URL}/asks/all`)
+          .then(results => {
+            setMyAsk(results.data);
+            setBusy(false);
+            console.log('my asks ==>>>-', results.data);
+          })
+          .catch(error => {
+            setFault(error.message);
+            setBusy(false);
+          });
+      });
+    } catch (error) {
+      setFault(error as string);
+      setBusy(false);
+    } finally {
+      // setBusy(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    setMyAsk(myAsk);
+  }, [myAsk]);
+
+  //return
   return (
     <SafeAreaView style={styles.Container}>
       <StatusBar
         backgroundColor={whotheme.colors.primary}
         barStyle={'light-content'}
       />
-      {(busy || allAsks.loading) && (
+      {busy && !fault && (
         <View style={styles.LoadingContainer}>
           <ActivityIndicator size={'large'} color={whotheme.colors.tertiary} />
         </View>
       )}
-      {allAsks.error && (
+      {!busy && fault && (
         <View style={styles.ErrorContainer}>
-          <BodyText>{allAsks.error}</BodyText>
+          <BodyText>{fault}</BodyText>
         </View>
       )}
-      {/* {!busy && !asksData && ( */}
-      {!(asksData.length > 0) && (
+      {myAsk && !(myAsk.length > 0) && (
         <View style={styles.LoadingContainer}>
           <BodyText>{'No asks to show right now ☹️'}</BodyText>
         </View>
       )}
       <ScrollView style={styles.ScrollableView}>
-        {asksData &&
-          asksData.length > 0 &&
-          asksData.map(ask => (
-            <AskCard
-              key={ask._id}
-              onPress={() => navigation.navigate('EditAsk', {askId: ask._id})}
-              username={ask.userInfo.username}
-              // onPress={() => {}}
-              message={ask.message}
-              expiry={`${formatDistanceToNow(new Date(ask.createdAt))}`}
-            />
-          ))}
+        {myAsk &&
+          myAsk.length > 0 &&
+          myAsk.map(
+            (ask: askType) =>
+              ask.user._id === myId && (
+                <AskCard
+                  key={ask._id}
+                  // onPress={() => navigation.navigate('EditAsk', {askId: ask._id})}
+                  onPress={() => {}}
+                  username={ask.user?.username || 'you'}
+                  profilePhoto={ask.user?.photo}
+                  // onPress={() => {}}
+                  message={ask.message}
+                  expiry={`${formatDistanceToNow(new Date(ask.createdAt))}`}
+                />
+              ),
+          )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -106,7 +108,7 @@ export default function MyAsks() {
 const styles = StyleSheet.create({
   Container: {
     backgroundColor: 'white',
-    paddingHorizontal: 16,
+    paddingHorizontal: 6,
     flex: 1,
   },
   ScrollableView: {

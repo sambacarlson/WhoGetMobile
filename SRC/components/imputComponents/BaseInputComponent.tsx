@@ -2,7 +2,7 @@ import React from 'react';
 import {InputModeOptions, StyleSheet} from 'react-native';
 import {whotheme} from '../../global/variables';
 import {TextInput} from 'react-native-gesture-handler';
-import BodyText from '../baseTextComponents/bodyText/BodyText';
+import BodyText from '../textComponents/BodyText';
 
 export default function BaseInputComponent(props: {
   style?: {};

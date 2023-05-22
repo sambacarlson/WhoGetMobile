@@ -1,6 +1,6 @@
 import React from 'react';
 import {Text, StyleSheet} from 'react-native';
-import {whotheme} from '../../../global/variables';
+import {whotheme} from '../../global/variables';
 
 export default function Heading2Text(props: {style?: {}; children: string}) {
   return (

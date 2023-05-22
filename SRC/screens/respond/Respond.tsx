@@ -8,7 +8,6 @@ import {
   Pressable,
   Linking,
 } from 'react-native';
-import BodyText from '../../components/baseTextComponents/bodyText/BodyText';
 import {whotheme} from '../../global/variables';
 
 const whatsapp = require('../../images/icons/whatsapp.png');
@@ -17,40 +16,36 @@ const email = require('../../images/icons/email.png');
 const placeholderImage = require('../../images/icons/image.png');
 import {useNavigation} from '@react-navigation/core';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {RouteStackParams} from '../../global/types';
+import {RouteStackParams, askType, userType} from '../../global/types';
 import HeaderTitle from '../../components/headerStyleComponents/HeaderTitle';
 // import HeaderLeft from '../../components/headerStyleComponents/HeaderLeft';
-import {useAppDispatch, useAppSelector} from '../../redux/redux_store/hooks';
-import {askType, userType} from '../../redux/services/types';
-import {formattedDate, getUid} from '../../global/functions';
+import {formattedDate, getItemLocalStorage} from '../../global/functions';
+import BodyText from '../../components/textComponents/BodyText';
+import {useAppSelector} from '../../redux/hooks';
 // import {formatDistanceToNow} from 'date-fns';
-import {fetchUser} from '../../redux/services/redux_slices/userSlice';
 
-export default function Respond({route}) {
+export default function Respond({route}: any) {
   const {askId} = route.params;
-  const dispatch = useAppDispatch();
   const [thisUser, setThisUser] = useState<userType>();
-  const thisAsk: askType = useAppSelector(
-    state => state.ask.asks.filter(ask => ask._id === askId)[0],
+  //get asks
+  const oneAsk: askType = useAppSelector(
+    state => state.ask.filter(ask => ask._id === askId)[0],
   );
-  //user who wants to respond must be logged In
-  getUid().then(uid => {
-    uid === null && navigation.navigate('Auth');
-  });
+  let greeting: string;
+  if (oneAsk.user && thisUser) {
+    greeting = `Hello, ${oneAsk.user.username}, I am ${
+      thisUser.username
+    }. I came across your request on *whoget*. from ${formattedDate(
+      oneAsk.updatedAt,
+    )}. `;
+  } else {
+    greeting = '';
+  }
+
   // useEffect
   useEffect(() => {
-    // user who created the ask
-    dispatch(fetchUser({userDbId: thisAsk.userInfo.user_id})).then(user =>
-      setThisUser(user.payload),
-    );
-  }, [dispatch, thisAsk.userInfo.user_id]);
-  // const thisUsers = useAppSelector(state => state.user.users);
-  // console.log(thisUser);
-  // const thisUser = {
-  //   telephone: 677964952,
-  //   whatsapp: 677964952,
-  //   email: 'sambacarlson@yahoo.com',
-  // };
+    getItemLocalStorage('@thisUser').then(value => setThisUser(value));
+  }, []);
   const navigation =
     useNavigation<NativeStackNavigationProp<RouteStackParams>>();
   navigation.setOptions({
@@ -58,9 +53,9 @@ export default function Respond({route}) {
     headerTitle: () => (
       <HeaderTitle
         showProfile={true}
-        username={thisAsk.userInfo.username}
-        postDate={`${formattedDate(thisAsk.createdAt)}`}
-        profilePicture={thisAsk.userInfo.photo}
+        username={oneAsk.user.username}
+        postDate={`${formattedDate(oneAsk.createdAt)}`}
+        profilePicture={oneAsk.user.photo}
       />
     ),
     // headerLeft: () => <HeaderLeft onPress={() => navigation.pop()} />,
@@ -68,15 +63,15 @@ export default function Respond({route}) {
   return (
     <SafeAreaView style={styles.Container}>
       <BodyText style={styles.TimeLeft}>
-        {thisAsk.expiry.toString() + ' days'}
+        {oneAsk.expiry.toString() + ' days'}
       </BodyText>
       <View style={styles.AskBody}>
         <ScrollView>
-          <BodyText>{thisAsk.message}</BodyText>
+          <BodyText>{oneAsk.message}</BodyText>
           <BodyText style={styles.Categories}>
-            {thisAsk.categories.join(', ')}
+            {oneAsk.categories.join(', ')}
           </BodyText>
-          {thisAsk.image && (
+          {oneAsk.images[0] && (
             <View style={styles.AskImages}>
               <Image source={placeholderImage} style={styles.AskImage} />
             </View>
@@ -86,30 +81,32 @@ export default function Respond({route}) {
       <View style={styles.ReplyButtonsView}>
         <Pressable
           onPress={() => {
-            thisUser && Linking.openURL(`tel:${thisUser.telephone}`);
+            thisUser
+              ? oneAsk.user && Linking.openURL(`tel:${oneAsk.user.telephone}`)
+              : navigation.navigate('Auth');
           }}>
           <Image source={telephone} style={styles.ReplyButton} />
         </Pressable>
-        {thisUser && thisUser.whatsapp && (
+        {oneAsk.user && oneAsk.user.whatsapp && (
           <Pressable
             onPress={() => {
-              Linking.openURL(
-                `whatsapp://send?text=Hello,&phone=${thisUser.whatsapp}`,
-              );
+              thisUser
+                ? Linking.openURL(
+                    `whatsapp://send?phone=${oneAsk.user.whatsapp}&text=${greeting}`,
+                  )
+                : navigation.navigate('Auth');
             }}>
             <Image source={whatsapp} style={styles.ReplyButton} />
           </Pressable>
         )}
-        {thisUser && thisUser.email && (
+        {oneAsk.user && oneAsk.user.email && (
           <Pressable
             onPress={() => {
-              Linking.openURL(
-                `mailto:${
-                  thisUser.email
-                }?subject=Reply to your ask on whoget from ${formattedDate(
-                  thisAsk.updatedAt,
-                )}&body=Hello`,
-              );
+              thisUser
+                ? Linking.openURL(
+                    `mailto:${oneAsk.user.email}?subject=reply to your request on whoget&body=${greeting}`,
+                  )
+                : navigation.navigate('Auth');
             }}>
             <Image source={email} style={styles.ReplyButton} />
           </Pressable>

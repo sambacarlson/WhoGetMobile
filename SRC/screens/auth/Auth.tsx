@@ -8,23 +8,24 @@ import {
   View,
 } from 'react-native';
 import {whotheme} from '../../global/variables';
-import Heading2Text from '../../components/baseTextComponents/heading2Text/Heading2Text';
-import BodyText from '../../components/baseTextComponents/bodyText/BodyText';
-import {ActionButton} from '../../components/baseButtonComponents/actionButton/ActionButton';
 import {useNavigation} from '@react-navigation/core';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {RouteStackParams} from '../../global/types';
 import auth from '@react-native-firebase/auth';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
-import {useAppDispatch} from '../../redux/redux_store/hooks';
-import {setUserAuth} from '../../redux/services/redux_slices/userAuthSlice';
+import {ActionButton} from '../../components/buttonComponents/ActionButton';
+import BodyText from '../../components/textComponents/BodyText';
+import Heading2Text from '../../components/textComponents/Heading2Text';
+import {RouteStackParams} from '../../global/types';
+import {getItemLocalStorage, setItemLocalStorage} from '../../global/functions';
 // import {auth} from '../../firebase/firebaseConfig';
 const logo = require('../../images/whoget_green.png');
 // const facebook = require('../../images/icons/facebook.png');
 const google = require('../../images/icons/google.png');
 
+console.log('screen ====> auth');
+
 export default function Auth() {
-  const dispatch = useAppDispatch();
+  // const dispatch = useAppDispatch();
   // google signin configuration..
   GoogleSignin.configure({
     webClientId:
@@ -44,41 +45,45 @@ export default function Auth() {
   //
   const navigation =
     useNavigation<NativeStackNavigationProp<RouteStackParams>>();
-  useEffect(() => {
-    navigation.push('Splash');
-  }, [navigation]);
   const [busy, setBusy] = useState<boolean>(false);
+  const [fault, setFault] = useState<string>('');
+  const [thisUser, setThisUser] = useState<any>();
   const handleSkip = () => {
     navigation.push('AsksNav');
   };
   // handle google sign in button press.
   const handleGoogleAuth = async () => {
-    console.log('trying to authenticate...');
     setBusy(true);
     try {
-      onGoogleButtonPress()
-        .then(userObj => {
-          const {uid, email, displayName, photoURL} = userObj.user;
-          dispatch(
-            setUserAuth({
-              uid,
-              email,
-              username: displayName,
-              photo: photoURL,
-            }),
-          );
-          /** check if user already has an account */
-          if (userObj.additionalUserInfo?.isNewUser) {
+      /** if user information is not found on local storage? */
+      !thisUser &&
+        onGoogleButtonPress()
+          .then(userObj => {
+            /** collect basic information from user from auth  */
+            const {uid, email, displayName, photoURL} = userObj.user;
+            const isNewUser = userObj.additionalUserInfo?.isNewUser; // need this for next screen (interests)
+            setItemLocalStorage(
+              '@tempThisUser',
+              JSON.stringify({
+                isNewUser,
+                oAuthId: uid,
+                oAuthProvider: 'google',
+                email,
+                username: displayName,
+                photo: photoURL,
+              }),
+            );
             navigation.navigate('Interests');
-          } else {
-            navigation.navigate('AsksNav');
-            // navigation.navigate('AsksNav');
-          }
-        })
-        .catch(error => console.log(error));
-    } catch (error) {
-      console.log('an error occured');
-      console.log(error);
+          })
+          /// if an error occurs communicating with google
+          .catch(() => {
+            setBusy(false);
+            setFault('could not sign in');
+          });
+      thisUser && navigation.navigate('AsksNav');
+    } catch (error: any) {
+      // in case any other errors occur
+      setFault('an error occured');
     } finally {
       setBusy(false);
     }
@@ -92,6 +97,11 @@ export default function Auth() {
     }, 500);
   };
   */
+
+  useEffect(() => {
+    // navigation.push('Splash');
+    getItemLocalStorage('@thisUser').then(results => setThisUser(results));
+  }, [navigation]);
 
   return (
     <View style={styles.container}>
@@ -129,6 +139,7 @@ export default function Auth() {
           color={whotheme.colors.primary}
           size="large"
         />
+        {fault && <BodyText style={styles.ErrorText}>{fault}</BodyText>}
       </View>
     </View>
   );
@@ -172,5 +183,9 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     // alignSelf: 'flex-end',
     marginTop: 16,
+  },
+  ErrorText: {
+    textAlign: 'center',
+    color: whotheme.colors.tertiary,
   },
 });

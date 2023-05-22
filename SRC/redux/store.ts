@@ -1,13 +1,11 @@
 import {configureStore} from '@reduxjs/toolkit';
-import userReducer from '../services/redux_slices/userSlice';
-import askReducer from '../services/redux_slices/askSlice';
-import userAuthReducer from '../services/redux_slices/userAuthSlice';
+import userReducer from './slices/userSlice';
+import askReducer from './slices/askSlice';
 
 const store = configureStore({
   reducer: {
     user: userReducer,
     ask: askReducer,
-    userAuth: userAuthReducer,
   },
 });
 

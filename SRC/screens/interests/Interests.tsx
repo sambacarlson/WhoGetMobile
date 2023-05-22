@@ -1,28 +1,28 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {StyleSheet, ScrollView, View, StatusBar} from 'react-native';
-import Heading1Text from '../../components/baseTextComponents/heading1Text/Heading1Text';
-import BodyText from '../../components/baseTextComponents/bodyText/BodyText';
-import Heading2Text from '../../components/baseTextComponents/heading2Text/Heading2Text';
-import {ActionButton} from '../../components/baseButtonComponents/actionButton/ActionButton';
-import CategoryButton from '../../components/baseButtonComponents/categoryButton/CategoryButton';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/core';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RouteStackParams} from '../../global/types';
 import {whotheme} from '../../global/variables';
-import {useAppDispatch} from '../../redux/redux_store/hooks';
-import {setUserAuth} from '../../redux/services/redux_slices/userAuthSlice';
 import {defaultInterests} from './interetsList';
-import {v4 as uuidv4} from 'uuid';
+import {ActionButton} from '../../components/buttonComponents/ActionButton';
+import CategoryButton from '../../components/buttonComponents/CategoryButton';
+import BodyText from '../../components/textComponents/BodyText';
+import Heading1Text from '../../components/textComponents/Heading1Text';
+import Heading2Text from '../../components/textComponents/Heading2Text';
+import {getItemLocalStorage, setItemLocalStorage} from '../../global/functions';
 
-// TODO: remove allCategories array. replace with actual data
-const categories = [...defaultInterests];
-
+// TODO: remove allCategories array. replace dynamic categories
+const categories = Array.from(new Set([...defaultInterests]));
 export default function Interests() {
-  const dispatch = useAppDispatch();
+  // const dispatch = useAppDispatch();
   const navigation =
     useNavigation<NativeStackNavigationProp<RouteStackParams>>();
   const [busy, setBusy] = useState<boolean>(false);
+  // const [fault, setFault] = useState<string>('');
+  const [tempThisUser, setTempThisUser] = useState<any>('');
+
   const [chosenCategories, setChosenCategories] = useState<string[]>([]);
   const [allCategories, setAllCategories] = useState<string[]>(categories);
 
@@ -43,14 +43,36 @@ export default function Interests() {
 
   const handleContinue = () => {
     setBusy(true);
-    dispatch(
-      setUserAuth({
+    //save(append) @tempThisUser
+    console.log('tempUser', tempThisUser);
+    setItemLocalStorage(
+      '@tempThisUser',
+      JSON.stringify({
+        ...tempThisUser,
         interests: chosenCategories,
       }),
-    );
+    )
+      .then(() => {
+        navigation.navigate('Contact');
+      })
+      .catch(() => {
+        setBusy(false);
+      });
+    //navigate to contacts
     setBusy(false);
     navigation.navigate('Contact');
   };
+
+  useEffect(() => {
+    //get tempThisUser from local storage
+    getItemLocalStorage('@tempThisUser').then(results =>
+      setTempThisUser(results),
+    );
+    if (!tempThisUser.isNewUser) {
+      //TODO: we will use isNewUser to decide if to pull interests from the database for user to continue from there
+    }
+  }, [tempThisUser.isNewUser]);
+
   //Return
   return (
     <SafeAreaView style={styles.Container}>
@@ -58,49 +80,54 @@ export default function Interests() {
         backgroundColor={whotheme.colors.primary}
         barStyle={'light-content'}
       />
-      <Heading1Text>What are your Interests?</Heading1Text>
-      <BodyText>Choose as many as interests you</BodyText>
-      <ScrollView>
-        <View style={styles.Interests}>
-          {chosenCategories.length > 0 && (
+      <View style={styles.Headings}>
+        <Heading1Text>What are your Interests?</Heading1Text>
+        <BodyText>Choose as many as interests you</BodyText>
+      </View>
+      <View style={styles.Body}>
+        <ScrollView>
+          <View style={styles.Interests}>
+            {chosenCategories.length > 0 && (
+              <View>
+                <Heading2Text>Your Interests</Heading2Text>
+                <View style={styles.ChosenInterests}>
+                  {/* here map over chosen interests and display */}
+                  {chosenCategories.map(category => (
+                    <CategoryButton
+                      key={chosenCategories.indexOf(category) + category}
+                      onPress={() => handleRemoveInterest(category)}>
+                      {category}
+                    </CategoryButton>
+                  ))}
+                </View>
+              </View>
+            )}
             <View>
-              <Heading2Text>Your Interests</Heading2Text>
-              <View style={styles.ChosenInterests}>
+              <Heading2Text>Choose from below</Heading2Text>
+              <View style={styles.AllCategories}>
                 {/* here map over chosen interests and display */}
-                {chosenCategories.map(category => (
+                {allCategories.map(category => (
                   <CategoryButton
-                    // key={chosenCategories.indexOf(category) + category}
-                    key={uuidv4()}
-                    onPress={() => handleRemoveInterest(category)}>
+                    key={allCategories.indexOf(category) + category}
+                    onPress={() => {
+                      handleAddInterest(category);
+                    }}>
                     {category}
                   </CategoryButton>
                 ))}
               </View>
             </View>
-          )}
-          <View>
-            <Heading2Text>Choose from below</Heading2Text>
-            <View style={styles.AllCategories}>
-              {/* here map over chosen interests and display */}
-              {allCategories.map(category => (
-                <CategoryButton
-                  key={allCategories.indexOf(category) + category}
-                  onPress={() => {
-                    handleAddInterest(category);
-                  }}>
-                  {category}
-                </CategoryButton>
-              ))}
-            </View>
           </View>
-        </View>
-      </ScrollView>
-      <ActionButton
-        onPress={handleContinue}
-        busy={busy}
-        style={styles.ActionButton}>
-        Continue
-      </ActionButton>
+        </ScrollView>
+      </View>
+      <View style={styles.Foot}>
+        <ActionButton
+          onPress={handleContinue}
+          busy={busy}
+          style={styles.ActionButton}>
+          Continue
+        </ActionButton>
+      </View>
     </SafeAreaView>
   );
 }
@@ -109,9 +136,9 @@ const styles = StyleSheet.create({
   Container: {
     // backgroundColor: 'white',
     flexDirection: 'column',
-    padding: 24,
+    paddingHorizontal: 24,
     // backgroundColor: 'orange',
-    minHeight: '100%',
+    height: '100%',
   },
   Interests: {
     marginVertical: 24,
@@ -134,6 +161,20 @@ const styles = StyleSheet.create({
   ActionButton: {
     width: '100%',
     AlignItems: 'center',
-    bottom: 70,
+    // bottom: 70,
+  },
+  /////
+  Headings: {
+    paddingTop: 16,
+    flex: 1,
+    minHeight: 20,
+  },
+  Body: {flex: 8, alignItems: 'center'},
+  Foot: {
+    minHeight: 20,
+    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'flex-end',
+    paddingBottom: 16,
   },
 });
