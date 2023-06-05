@@ -19,7 +19,11 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RouteStackParams, askType, userType} from '../../global/types';
 import HeaderTitle from '../../components/headerStyleComponents/HeaderTitle';
 // import HeaderLeft from '../../components/headerStyleComponents/HeaderLeft';
-import {formattedDate, getItemLocalStorage} from '../../global/functions';
+import {
+  formattedDate,
+  getItemLocalStorage,
+  getTimeLeft,
+} from '../../global/functions';
 import BodyText from '../../components/textComponents/BodyText';
 import {useAppSelector} from '../../redux/hooks';
 // import {formatDistanceToNow} from 'date-fns';
@@ -27,6 +31,7 @@ import {useAppSelector} from '../../redux/hooks';
 export default function Respond({route}: any) {
   const {askId} = route.params;
   const [thisUser, setThisUser] = useState<userType>();
+  const [isExpired, setIsExpired] = useState<boolean>(true);
   //get asks
   const oneAsk: askType = useAppSelector(
     state => state.ask.filter(ask => ask._id === askId)[0],
@@ -41,7 +46,6 @@ export default function Respond({route}: any) {
   } else {
     greeting = '';
   }
-
   // useEffect
   useEffect(() => {
     getItemLocalStorage('@thisUser').then(value => setThisUser(value));
@@ -60,10 +64,20 @@ export default function Respond({route}: any) {
     ),
     // headerLeft: () => <HeaderLeft onPress={() => navigation.pop()} />,
   });
+  const toDate = getTimeLeft(oneAsk.createdAt, oneAsk.expiry);
+  useEffect(() => {
+    toDate.seconds <= 0 && setIsExpired(true);
+  }, [toDate.seconds]);
   return (
     <SafeAreaView style={styles.Container}>
       <BodyText style={styles.TimeLeft}>
-        {oneAsk.expiry.toString() + ' days'}
+        {toDate.days > 0
+          ? `${toDate.days} days left`
+          : toDate.hours > 0
+          ? `${toDate.hours} hours left`
+          : toDate.minutes > 0
+          ? `${toDate.minutes} minutes left`
+          : 'expired'}
       </BodyText>
       <View style={styles.AskBody}>
         <ScrollView>
@@ -78,40 +92,42 @@ export default function Respond({route}: any) {
           )}
         </ScrollView>
       </View>
-      <View style={styles.ReplyButtonsView}>
-        <Pressable
-          onPress={() => {
-            thisUser
-              ? oneAsk.user && Linking.openURL(`tel:${oneAsk.user.telephone}`)
-              : navigation.navigate('Auth');
-          }}>
-          <Image source={telephone} style={styles.ReplyButton} />
-        </Pressable>
-        {oneAsk.user && oneAsk.user.whatsapp && (
+      {!isExpired && (
+        <View style={styles.ReplyButtonsView}>
           <Pressable
             onPress={() => {
               thisUser
-                ? Linking.openURL(
-                    `whatsapp://send?phone=${oneAsk.user.whatsapp}&text=${greeting}`,
-                  )
+                ? oneAsk.user && Linking.openURL(`tel:${oneAsk.user.telephone}`)
                 : navigation.navigate('Auth');
             }}>
-            <Image source={whatsapp} style={styles.ReplyButton} />
+            <Image source={telephone} style={styles.ReplyButton} />
           </Pressable>
-        )}
-        {oneAsk.user && oneAsk.user.email && (
-          <Pressable
-            onPress={() => {
-              thisUser
-                ? Linking.openURL(
-                    `mailto:${oneAsk.user.email}?subject=reply to your request on whoget&body=${greeting}`,
-                  )
-                : navigation.navigate('Auth');
-            }}>
-            <Image source={email} style={styles.ReplyButton} />
-          </Pressable>
-        )}
-      </View>
+          {oneAsk.user && oneAsk.user.whatsapp && (
+            <Pressable
+              onPress={() => {
+                thisUser
+                  ? Linking.openURL(
+                      `whatsapp://send?phone=${oneAsk.user.whatsapp}&text=${greeting}`,
+                    )
+                  : navigation.navigate('Auth');
+              }}>
+              <Image source={whatsapp} style={styles.ReplyButton} />
+            </Pressable>
+          )}
+          {oneAsk.user && oneAsk.user.email && (
+            <Pressable
+              onPress={() => {
+                thisUser
+                  ? Linking.openURL(
+                      `mailto:${oneAsk.user.email}?subject=reply to your request on whoget&body=${greeting}`,
+                    )
+                  : navigation.navigate('Auth');
+              }}>
+              <Image source={email} style={styles.ReplyButton} />
+            </Pressable>
+          )}
+        </View>
+      )}
     </SafeAreaView>
   );
 }

@@ -57,10 +57,9 @@ export default function Contact() {
     setBusy(true);
     setFault(false);
     try {
-      delete formData.isNewUser;
-      console.log('<<====FormData===>>', formData, '<<//////>>');
+      // console.log('<<====FormData===>>', formData, '<<//////>>');
       const user = await axios.post(`${BASE_URL}/users/one`, {...formData});
-      console.log('user====>>>', user.data);
+      // console.log('user====>>>', user.data);
       await setItemLocalStorage('@thisUser', JSON.stringify(user.data));
       await removeItemLocalStorage('@tempThisUser');
       setBusy(false);
@@ -68,15 +67,15 @@ export default function Contact() {
     } catch (error) {
       setBusy(false);
       setFault(true);
-      console.log('error occured =====>> ', error);
+      // console.log('error occured =====>> ', error);
     }
   };
 
   useEffect(() => {
     getItemLocalStorage('@tempThisUser').then(item => {
-      console.log('======>> formost', item);
+      // console.log('======>> formost', item);
       setFormData(prev => ({...prev, ...item}));
-      console.log('=====>>>this next');
+      // console.log('=====>>>this next');
     });
   }, []);
 

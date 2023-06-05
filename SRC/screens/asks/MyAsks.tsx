@@ -1,8 +1,9 @@
 import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
+  FlatList,
+  RefreshControl,
   SafeAreaView,
-  ScrollView,
   StatusBar,
   StyleSheet,
   View,
@@ -25,19 +26,42 @@ export default function MyAsks() {
     useNavigation<NativeStackNavigationProp<RouteStackParams>>();
   //get asks
   const [busy, setBusy] = useState<boolean>(false);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
   const [fault, setFault] = useState<string>();
-  const [myAsk, setMyAsk] = useState<any>();
+  const [myAsk, setMyAsk] = useState<askType[]>([]);
   const [myId, setMyId] = useState<string>('');
 
+  //refresh control
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    setFault('');
+    axios
+      .get(`${BASE_URL}/asks/many/byuser/${myId}`)
+      .then(allAsks => {
+        setMyAsk(allAsks.data);
+        setRefreshing(false);
+      })
+      .catch(error => {
+        setFault(error.message);
+        setRefreshing(false);
+      });
+  }, [myId]);
+
+  //useeffect
   useEffect(() => {
     setBusy(true);
     setFault('');
     try {
       getItemLocalStorage('@thisUser').then(thisUser => {
+        if (thisUser === null) {
+          setMyAsk([]);
+          setBusy(false);
+          return;
+        }
         setMyId(thisUser._id);
         axios
           // .get(`${BASE_URL}/asks/many/byuser/${thisUser._id}`)
-          .get(`${BASE_URL}/asks/all`)
+          .get(`${BASE_URL}/asks/many/byuser/${myId}`)
           .then(results => {
             setMyAsk(results.data);
             setBusy(false);
@@ -51,10 +75,8 @@ export default function MyAsks() {
     } catch (error) {
       setFault(error as string);
       setBusy(false);
-    } finally {
-      // setBusy(false);
     }
-  }, []);
+  }, [myId]);
 
   useEffect(() => {
     setMyAsk(myAsk);
@@ -77,30 +99,36 @@ export default function MyAsks() {
           <BodyText>{fault}</BodyText>
         </View>
       )}
-      {myAsk && !(myAsk.length > 0) && (
+      {!fault && myAsk && !(myAsk.length > 0) && (
         <View style={styles.LoadingContainer}>
           <BodyText>{'No asks to show right now ☹️'}</BodyText>
         </View>
       )}
-      <ScrollView style={styles.ScrollableView}>
-        {myAsk &&
-          myAsk.length > 0 &&
-          myAsk.map(
-            (ask: askType) =>
-              ask.user._id === myId && (
-                <AskCard
-                  key={ask._id}
-                  // onPress={() => navigation.navigate('EditAsk', {askId: ask._id})}
-                  onPress={() => {}}
-                  username={ask.user?.username || 'you'}
-                  profilePhoto={ask.user?.photo}
-                  // onPress={() => {}}
-                  message={ask.message}
-                  expiry={`${formatDistanceToNow(new Date(ask.createdAt))}`}
-                />
-              ),
+      {!fault && !busy && (
+        <FlatList
+          style={styles.ScrollableView}
+          data={myAsk.filter(ask => ask.user._id === myId)}
+          keyExtractor={item => item._id}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={[whotheme.colors.primaryLight]}
+            />
+          }
+          renderItem={({item}) => (
+            <AskCard
+              key={item._id}
+              // onPress={() => navigation.navigate('EditAsk', {askId: item._id})}
+              onPress={() => {}}
+              username={item.user?.username || 'you'}
+              profilePhoto={item.user?.photo}
+              message={item.message}
+              expiry={`${formatDistanceToNow(new Date(item.createdAt))}`}
+            />
           )}
-      </ScrollView>
+        />
+      )}
     </SafeAreaView>
   );
 }

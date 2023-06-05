@@ -1,8 +1,9 @@
 import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
+  FlatList,
+  RefreshControl,
   SafeAreaView,
-  ScrollView,
   StatusBar,
   StyleSheet,
   View,
@@ -26,10 +27,27 @@ export default function AllAsks() {
   //get asks
   const asks = useAppSelector(state => state.ask);
 
-  const [asksData, setAsksData] = useState<askType[]>(asks);
+  const [asksData, setAsksData] = useState<askType[]>(asks ? asks : []);
   const [busy, setBusy] = useState<boolean>(false);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
   const [fault, setFault] = useState<string>('');
 
+  //refresh
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    axios
+      .get(`${BASE_URL}/asks/all`)
+      .then(allAsks => {
+        dispatch(populateAsks(allAsks.data));
+        setRefreshing(false);
+      })
+      .catch(error => {
+        setFault(error.message);
+        setRefreshing(false);
+      });
+  }, [dispatch]);
+
+  //useEffect
   useEffect(() => {
     try {
       setBusy(true);
@@ -39,37 +57,40 @@ export default function AllAsks() {
         .then(thisUser => {
           if (thisUser !== null) {
             // fetch categorized asks
-            // const catStr = thisUser.interests.join(',');
+            const catStr = thisUser.interests
+              .map((str: string) => str.replace(/ /g, '%20')) // replace spaces with uri encoding %20
+              .join(',');
+            console.log('catStr===============>>>', catStr);
             axios
               .get(
-                // `${BASE_URL}/asks/many/unflagged/categories?categories=${catStr}`,
-                `${BASE_URL}/asks/all`,
+                `${BASE_URL}/asks/many/unflagged/bycategories?categories=${catStr}`,
+                // `${BASE_URL}/asks/all`,
               )
               .then(allAsks => {
                 dispatch(populateAsks(allAsks.data));
                 setBusy(false);
               })
               .catch(error => {
-                setFault(error);
+                setFault(error.message);
                 setBusy(false);
               });
           } else {
             // fetch all asks uncategorized
             axios
-              // .get(`${BASE_URL}/asks/many/unflagged`)
-              .get(`${BASE_URL}/asks/all`)
+              .get(`${BASE_URL}/asks/many/unflagged`)
+              // .get(`${BASE_URL}/asks/all`)
               .then(allAsks => {
                 dispatch(populateAsks(allAsks.data));
                 setBusy(false);
               })
               .catch(error => {
-                setFault(error);
+                setFault(error.message);
                 setBusy(false);
               });
           }
         })
         .catch(error => {
-          setFault(error);
+          setFault(error.message);
           setBusy(false);
         });
     } finally {
@@ -113,20 +134,30 @@ export default function AllAsks() {
           </BodyText>
         </View>
       )}
-      <ScrollView style={styles.ScrollableView}>
-        {asksData &&
-          asksData.length > 0 &&
-          asksData.map(ask => (
-            <AskCard
-              key={ask._id}
-              onPress={() => navigation.navigate('Respond', {askId: ask._id})}
-              username={ask.user.username}
-              profilePhoto={ask.user.photo}
-              message={ask.message}
-              expiry={`${formatDistanceToNow(new Date(ask.createdAt))}`}
+      {!busy && !fault && asksData.length > 0 && (
+        <FlatList
+          style={styles.ScrollableView}
+          data={asksData}
+          keyExtractor={item => item._id}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={[whotheme.colors.primaryLight]}
             />
-          ))}
-      </ScrollView>
+          }
+          renderItem={({item}) => (
+            <AskCard
+              key={item._id}
+              onPress={() => navigation.navigate('Respond', {askId: item._id})}
+              username={item.user.username}
+              profilePhoto={item.user.photo}
+              message={item.message}
+              expiry={`${formatDistanceToNow(new Date(item.createdAt))}`}
+            />
+          )}
+        />
+      )}
     </SafeAreaView>
   );
 }

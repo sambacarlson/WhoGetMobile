@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     justifyContent: 'flex-end',
     borderWidth: 0,
-    borderBottomColor: '#a0a0a0',
+    borderBottomColor: '#efefef',
     borderBottomWidth: 1,
     borderRadius: 0,
     paddingLeft: 0,

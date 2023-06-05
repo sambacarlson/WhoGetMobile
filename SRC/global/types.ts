@@ -59,3 +59,9 @@ export type tempUserType = {
   interests: string[];
   status: {banned: boolean; bannedDate: string};
 };
+
+export type interestType = {
+  _id: string;
+  group: string;
+  name: string;
+};

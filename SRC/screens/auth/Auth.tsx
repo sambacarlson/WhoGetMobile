@@ -22,8 +22,6 @@ const logo = require('../../images/whoget_green.png');
 // const facebook = require('../../images/icons/facebook.png');
 const google = require('../../images/icons/google.png');
 
-console.log('screen ====> auth');
-
 export default function Auth() {
   // const dispatch = useAppDispatch();
   // google signin configuration..
@@ -61,11 +59,9 @@ export default function Auth() {
           .then(userObj => {
             /** collect basic information from user from auth  */
             const {uid, email, displayName, photoURL} = userObj.user;
-            const isNewUser = userObj.additionalUserInfo?.isNewUser; // need this for next screen (interests)
             setItemLocalStorage(
               '@tempThisUser',
               JSON.stringify({
-                isNewUser,
                 oAuthId: uid,
                 oAuthProvider: 'google',
                 email,
