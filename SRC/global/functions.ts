@@ -1,5 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {httpMethodTypes} from './types';
+import axios from 'axios';
+import {BASE_URL} from './variables';
 
+/**
+ * @param isoTimestamp {string} iso timestamp as string
+ * @returns {string} more readable date
+ */
 export function formattedDate(isoTimestamp: string): string {
   const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const monthsOfYear = [
@@ -27,24 +34,51 @@ export function formattedDate(isoTimestamp: string): string {
   return `${dayOfWeek}, ${month} ${day}, ${hours}:${minutes}`;
 }
 
+/**
+ * retrieves json-parsed object from local storage
+ * @param key {string} key of item to retrieve
+ * @returns {object}
+ */
 export async function getItemLocalStorage(key: string) {
   let value: string | null = '';
   await AsyncStorage.getItem(key).then(val => (value = val));
   return JSON.parse(value);
 }
+/**
+ * Stringifies and dds a new item to local storage
+ * @param key {string}
+ * @param value {string} data to store
+ * @returns {0}
+ */
 export async function setItemLocalStorage(key: string, value: string) {
   await AsyncStorage.setItem(key, value);
   return 0;
 }
+/**
+ * Removes/deletes and item from local storage
+ * @param key {string}
+ * @returns {0}
+ */
 export async function removeItemLocalStorage(key: string) {
   await AsyncStorage.removeItem(key);
   return 0;
 }
+/**
+ * Clears local storage
+ * @returns {0}
+ */
 export async function clearLocalStorage() {
   await AsyncStorage.clear();
   return 0;
 }
 
+/**
+ * takes a date and a number (of days) as parameters and returns time left from current date, when given number is added to given date. takes an optinal 'today' date parameter.
+ * @param createdAt {date} original date. could be date or stringified date
+ * @param num {number} number of days to expiry from createdAt
+ * @param today {date} optional current date.
+ * @returns {{daysLeft: number, hoursLeft: number, minutesLeft: number, secondsLeft: number}} object representing number of days, hours, minutes, seconds left
+ */
 export function getTimeLeft(
   createdAt: string | Date,
   num: number,
@@ -73,4 +107,39 @@ export function getTimeLeft(
     minutes: minutesLeft,
     seconds: secondsLeft,
   };
+}
+
+/**
+ * makes an axios request.
+ * @param url {string} relative uri endpoint. provide only relative uri
+ * @param method {http.HttpMethod} http method
+ * @param data {object} (Optional depending on method) data
+ * @returns {Promise}
+ */
+export async function axiosRequest(
+  url: string,
+  method: httpMethodTypes,
+  data = {},
+) {
+  try {
+    const response = await axios({
+      method: method,
+      url: BASE_URL + '/' + url,
+      data: data,
+    });
+    return response.data;
+  } catch (error: any) {
+    throw error.message;
+  }
+}
+
+/**
+ * logs a message
+ * @param message {any[]} message to log
+ * @returns {void}
+ */
+export function logMessage(...message: string[]): void {
+  const blockLogs = false; //determines whether or not to turn on/off logs
+  !blockLogs && console.log('log--->', ...message);
+  return;
 }

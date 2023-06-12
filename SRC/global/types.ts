@@ -65,3 +65,5 @@ export type interestType = {
   group: string;
   name: string;
 };
+
+export type httpMethodTypes = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';

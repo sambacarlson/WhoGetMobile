@@ -84,15 +84,6 @@ export default function Auth() {
       setBusy(false);
     }
   };
-  /**
-  const handleFacebookAuth = () => {
-    setBusy(true);
-    //FIXME: remove setTimeout
-    setTimeout(() => {
-      navigation.push('Interests');
-    }, 500);
-  };
-  */
 
   useEffect(() => {
     // navigation.push('Splash');

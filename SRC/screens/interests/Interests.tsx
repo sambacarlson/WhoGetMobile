@@ -11,15 +11,18 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/core';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RouteStackParams, interestType} from '../../global/types';
-import {BASE_URL, whotheme} from '../../global/variables';
+import {whotheme} from '../../global/variables';
 // import {defaultInterests} from './interetsList';
 import {ActionButton} from '../../components/buttonComponents/ActionButton';
 import CategoryButton from '../../components/buttonComponents/CategoryButton';
 import BodyText from '../../components/textComponents/BodyText';
 import Heading1Text from '../../components/textComponents/Heading1Text';
 import Heading2Text from '../../components/textComponents/Heading2Text';
-import {getItemLocalStorage, setItemLocalStorage} from '../../global/functions';
-import axios from 'axios';
+import {
+  axiosRequest,
+  getItemLocalStorage,
+  setItemLocalStorage,
+} from '../../global/functions';
 
 // const categories = Array.from(new Set([...defaultInterests]));
 
@@ -28,8 +31,7 @@ export default function Interests() {
   const onRefresh = useCallback(() => {
     setLoading(true);
     // fetch categories
-    axios
-      .get(`${BASE_URL}/interests/all`)
+    axiosRequest('interests/all', 'GET')
       .then(results => {
         setLoading(false);
         setAllCategories(results.data);
@@ -95,8 +97,7 @@ export default function Interests() {
       setTempThisUser(results),
     );
     // fetch categories
-    axios
-      .get(`${BASE_URL}/interests/all`)
+    axiosRequest('interests/all', 'GET')
       .then(results => {
         setLoading(false);
         setAllCategories(results.data);

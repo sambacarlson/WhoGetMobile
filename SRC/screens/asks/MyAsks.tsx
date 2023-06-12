@@ -12,13 +12,11 @@ import AskCard from '../../components/compoundComponents/AskCard';
 import {useNavigation} from '@react-navigation/core';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RouteStackParams, askType} from '../../global/types';
-import {BASE_URL, whotheme} from '../../global/variables';
+import {whotheme} from '../../global/variables';
 
 import {formatDistanceToNow} from 'date-fns';
 import BodyText from '../../components/textComponents/BodyText';
-import {getItemLocalStorage} from '../../global/functions';
-import axios from 'axios';
-
+import {axiosRequest, getItemLocalStorage} from '../../global/functions';
 export default function MyAsks() {
   // const dispatch = useAppDispatch();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -35,8 +33,7 @@ export default function MyAsks() {
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
     setFault('');
-    axios
-      .get(`${BASE_URL}/asks/many/byuser/${myId}`)
+    axiosRequest(`asks/many/byuser/${myId}`, 'GET')
       .then(allAsks => {
         setMyAsk(allAsks.data);
         setRefreshing(false);
@@ -47,7 +44,7 @@ export default function MyAsks() {
       });
   }, [myId]);
 
-  //useeffect
+  //useffect
   useEffect(() => {
     setBusy(true);
     setFault('');
@@ -59,13 +56,10 @@ export default function MyAsks() {
           return;
         }
         setMyId(thisUser._id);
-        axios
-          // .get(`${BASE_URL}/asks/many/byuser/${thisUser._id}`)
-          .get(`${BASE_URL}/asks/many/byuser/${myId}`)
+        axiosRequest(`asks/many/byuser/${myId}`, 'GET')
           .then(results => {
             setMyAsk(results.data);
             setBusy(false);
-            console.log('my asks ==>>>-', results.data);
           })
           .catch(error => {
             setFault(error.message);

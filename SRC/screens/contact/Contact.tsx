@@ -12,9 +12,10 @@ import {RouteStackParams, tempUserType} from '../../global/types';
 import {ScrollView} from 'react-native-gesture-handler';
 
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {BASE_URL, whotheme} from '../../global/variables';
+import {whotheme} from '../../global/variables';
 
 import {
+  axiosRequest,
   getItemLocalStorage,
   removeItemLocalStorage,
   setItemLocalStorage,
@@ -24,7 +25,6 @@ import BaseInputComponent from '../../components/imputComponents/BaseInputCompon
 import BodyText from '../../components/textComponents/BodyText';
 import Heading1Text from '../../components/textComponents/Heading1Text';
 import Heading2Text from '../../components/textComponents/Heading2Text';
-import axios from 'axios';
 
 const image_add = require('../../images/icons/image_add.png');
 
@@ -57,9 +57,7 @@ export default function Contact() {
     setBusy(true);
     setFault(false);
     try {
-      // console.log('<<====FormData===>>', formData, '<<//////>>');
-      const user = await axios.post(`${BASE_URL}/users/one`, {...formData});
-      // console.log('user====>>>', user.data);
+      const user = await axiosRequest('/users/one', 'POST', {...formData});
       await setItemLocalStorage('@thisUser', JSON.stringify(user.data));
       await removeItemLocalStorage('@tempThisUser');
       setBusy(false);
@@ -67,15 +65,12 @@ export default function Contact() {
     } catch (error) {
       setBusy(false);
       setFault(true);
-      // console.log('error occured =====>> ', error);
     }
   };
 
   useEffect(() => {
     getItemLocalStorage('@tempThisUser').then(item => {
-      // console.log('======>> formost', item);
       setFormData(prev => ({...prev, ...item}));
-      // console.log('=====>>>this next');
     });
   }, []);
 

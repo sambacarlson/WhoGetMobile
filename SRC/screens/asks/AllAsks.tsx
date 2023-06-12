@@ -12,12 +12,11 @@ import AskCard from '../../components/compoundComponents/AskCard';
 import {useNavigation} from '@react-navigation/core';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RouteStackParams, askType} from '../../global/types';
-import {BASE_URL, whotheme} from '../../global/variables';
+import {whotheme} from '../../global/variables';
 import {formatDistanceToNow} from 'date-fns';
 import BodyText from '../../components/textComponents/BodyText';
 import {useAppDispatch, useAppSelector} from '../../redux/hooks';
-import {getItemLocalStorage} from '../../global/functions';
-import axios from 'axios';
+import {axiosRequest, getItemLocalStorage} from '../../global/functions';
 import {populateAsks} from '../../redux/slices/askSlice';
 
 export default function AllAsks() {
@@ -35,14 +34,12 @@ export default function AllAsks() {
   //refresh
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
-    axios
-      .get(`${BASE_URL}/asks/all`)
-      .then(allAsks => {
-        dispatch(populateAsks(allAsks.data));
-        setRefreshing(false);
+    axiosRequest('asks/all', 'GET')
+      .then((response: askType) => {
+        dispatch(populateAsks(response));
       })
-      .catch(error => {
-        setFault(error.message);
+      .catch((error: any) => {
+        setFault(error);
         setRefreshing(false);
       });
   }, [dispatch]);
@@ -60,12 +57,10 @@ export default function AllAsks() {
             const catStr = thisUser.interests
               .map((str: string) => str.replace(/ /g, '%20')) // replace spaces with uri encoding %20
               .join(',');
-            console.log('catStr===============>>>', catStr);
-            axios
-              .get(
-                `${BASE_URL}/asks/many/unflagged/bycategories?categories=${catStr}`,
-                // `${BASE_URL}/asks/all`,
-              )
+            axiosRequest(
+              `asks/many/unflagged/bycategories?categories=${catStr}`,
+              'GET',
+            )
               .then(allAsks => {
                 dispatch(populateAsks(allAsks.data));
                 setBusy(false);
@@ -75,10 +70,7 @@ export default function AllAsks() {
                 setBusy(false);
               });
           } else {
-            // fetch all asks uncategorized
-            axios
-              .get(`${BASE_URL}/asks/many/unflagged`)
-              // .get(`${BASE_URL}/asks/all`)
+            axiosRequest('asks/many/unflagged', 'GET')
               .then(allAsks => {
                 dispatch(populateAsks(allAsks.data));
                 setBusy(false);
