@@ -15,8 +15,9 @@ import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import {ActionButton} from '../../components/buttonComponents/ActionButton';
 import BodyText from '../../components/textComponents/BodyText';
 import Heading2Text from '../../components/textComponents/Heading2Text';
-import {RouteStackParams} from '../../global/types';
-import {getItemLocalStorage, setItemLocalStorage} from '../../global/functions';
+import {RouteStackParams, userType} from '../../global/types';
+import {setItemLocalStorage} from '../../global/functions';
+import {useAppSelector} from '../../redux/hooks';
 // import {auth} from '../../firebase/firebaseConfig';
 const logo = require('../../images/whoget_green.png');
 // const facebook = require('../../images/icons/facebook.png');
@@ -43,9 +44,12 @@ export default function Auth() {
   //
   const navigation =
     useNavigation<NativeStackNavigationProp<RouteStackParams>>();
+  const user = useAppSelector(state => state.user);
+
   const [busy, setBusy] = useState<boolean>(false);
   const [fault, setFault] = useState<string>('');
-  const [thisUser, setThisUser] = useState<any>();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [thisUser, setThisUser] = useState<userType>(user);
   const handleSkip = () => {
     navigation.push('AsksNav');
   };
@@ -54,7 +58,7 @@ export default function Auth() {
     setBusy(true);
     try {
       /** if user information is not found on local storage? */
-      !thisUser &&
+      !thisUser._id &&
         onGoogleButtonPress()
           .then(userObj => {
             /** collect basic information from user from auth  */
@@ -86,8 +90,8 @@ export default function Auth() {
   };
 
   useEffect(() => {
-    // navigation.push('Splash');
-    getItemLocalStorage('@thisUser').then(results => setThisUser(results));
+    navigation.push('Splash');
+    // getItemLocalStorage('@thisUser').then(results => setThisUser(results));
   }, [navigation]);
 
   return (

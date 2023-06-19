@@ -5,8 +5,10 @@ import {ActionButton} from '../buttonComponents/ActionButton';
 
 const menuIcon = require('../../images/icons/options.png');
 const searchIcon = require('../../images/icons/search.png');
+const EditIcon = require('../../images/icons/edit.png');
 
 type HeaderRightProp = {
+  onPressEdit?: any;
   onPressSearch?: any;
   onPressNewAsk?: any;
   onPressMenu?: any;
@@ -22,12 +24,15 @@ export default function HeaderRight(props: HeaderRightProp) {
         </Pressable>
       ) : (
         <View style={styles.Container}>
+          <Pressable onPress={props.onPressEdit} style={styles.EditIcon}>
+            <Image source={EditIcon} style={styles.EditIcon} />
+          </Pressable>
           <Pressable onPress={props.onPressSearch} style={styles.SearchIcon}>
             <Image source={searchIcon} style={styles.SearchIcon} />
           </Pressable>
           <ActionButton
             onPress={props.onPressNewAsk}
-            children={'new ask'}
+            children={'+'}
             style={styles.ActionButtonStyle}
             textStyle={styles.ActionButtonTextStyle}
           />
@@ -44,26 +49,29 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-end',
     alignItems: 'center',
-    gap: 10,
+    gap: 14,
   },
   ActionButtonStyle: {
-    width: 60,
-    height: 24,
+    width: 30,
+    height: 30,
     backgroundColor: 'white',
-    //padding elements stated individually to overite those set on the ActionButtonComponent
-    paddingLeft: 0,
-    paddingTop: 0,
-    paddingBottom: 0,
-    paddingRight: 0,
+    padding: 0,
+    borderRadius: 20,
   },
   ActionButtonTextStyle: {
     color: whotheme.colors.primary,
-    fontSize: whotheme.fontSize.small,
-    fontWeight: '100',
-    whiteSpace: 'no-wrap',
+    fontSize: whotheme.fontSize.medium,
   },
   SearchIcon: {
-    width: 24,
-    height: 24,
+    width: 30,
+    height: 30,
+  },
+  EditIcon: {
+    width: 30,
+    height: 30,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

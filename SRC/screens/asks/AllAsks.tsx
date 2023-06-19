@@ -11,113 +11,84 @@ import {
 import AskCard from '../../components/compoundComponents/AskCard';
 import {useNavigation} from '@react-navigation/core';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {RouteStackParams, askType} from '../../global/types';
+import {RouteStackParams, userType} from '../../global/types';
 import {whotheme} from '../../global/variables';
 import {formatDistanceToNow} from 'date-fns';
 import BodyText from '../../components/textComponents/BodyText';
+import {useAxiosQuery} from '../../global/fetching';
+import {useQueryClient} from '@tanstack/react-query';
+import {ActionButton} from '../../components/buttonComponents/ActionButton';
 import {useAppDispatch, useAppSelector} from '../../redux/hooks';
-import {axiosRequest, getItemLocalStorage} from '../../global/functions';
+import {logMessage} from '../../global/functions';
 import {populateAsks} from '../../redux/slices/askSlice';
 
 export default function AllAsks() {
-  const dispatch = useAppDispatch();
+  const queryClient = useQueryClient();
   const navigation =
     useNavigation<NativeStackNavigationProp<RouteStackParams>>();
-  //get asks
-  const asks = useAppSelector(state => state.ask);
-
-  const [asksData, setAsksData] = useState<askType[]>(asks ? asks : []);
-  const [busy, setBusy] = useState<boolean>(false);
-  const [refreshing, setRefreshing] = useState<boolean>(false);
+  const dispatch = useAppDispatch();
+  const loadedUser = useAppSelector(state => state.user);
+  // replace spaces with uri encoding %20
+  logMessage(loadedUser.interests);
+  const catArr =
+    loadedUser.interests !== undefined
+      ? loadedUser.interests.map((str: string) => str.replace(/ /g, '%20'))
+      : [];
+  //use states
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [user, setUser] = useState<userType>({
+    ...loadedUser,
+    interests: catArr,
+  });
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [fault, setFault] = useState<string>('');
+
+  // fetch categorized asks
+  const interestStr = user?.interests.join(',') || '';
+  logMessage('interests-------->', user.interests);
+  const fetchUri =
+    user._id !== undefined
+      ? `asks/many/unflagged/bycategories?categories=${interestStr}`
+      : 'asks/many/unflagged';
+  logMessage(fetchUri);
+  const {isLoading, error, data} = useAxiosQuery(['asks'], fetchUri);
 
   //refresh
   const onRefresh = React.useCallback(() => {
-    setRefreshing(true);
-    axiosRequest('asks/all', 'GET')
-      .then((response: askType) => {
-        dispatch(populateAsks(response));
-      })
-      .catch((error: any) => {
-        setFault(error);
-        setRefreshing(false);
-      });
-  }, [dispatch]);
+    queryClient.invalidateQueries(['asks']);
+    logMessage('invalidated queries');
+  }, [queryClient]);
 
-  //useEffect
   useEffect(() => {
-    try {
-      setBusy(true);
-      setFault('');
-      // get thisuser from local storage.
-      getItemLocalStorage('@thisUser')
-        .then(thisUser => {
-          if (thisUser !== null) {
-            // fetch categorized asks
-            const catStr = thisUser.interests
-              .map((str: string) => str.replace(/ /g, '%20')) // replace spaces with uri encoding %20
-              .join(',');
-            axiosRequest(
-              `asks/many/unflagged/bycategories?categories=${catStr}`,
-              'GET',
-            )
-              .then(allAsks => {
-                dispatch(populateAsks(allAsks.data));
-                setBusy(false);
-              })
-              .catch(error => {
-                setFault(error.message);
-                setBusy(false);
-              });
-          } else {
-            axiosRequest('asks/many/unflagged', 'GET')
-              .then(allAsks => {
-                dispatch(populateAsks(allAsks.data));
-                setBusy(false);
-              })
-              .catch(error => {
-                setFault(error.message);
-                setBusy(false);
-              });
-          }
-        })
-        .catch(error => {
-          setFault(error.message);
-          setBusy(false);
-        });
-    } finally {
-      // setBusy(false);
-    }
-  }, [dispatch]);
-  //methods
-  console.log(
-    'loading:',
-    busy,
-    'error:',
-    fault,
-    'data length:',
-    asksData.length,
-  );
+    onRefresh(); // necessary so onRefresh runs just once
+  }, [onRefresh]);
   useEffect(() => {
-    setAsksData(asks);
-  }, [asks]);
+    dispatch(populateAsks(data));
+  }, [data, dispatch]);
+
+  //return
   return (
     <SafeAreaView style={styles.Container}>
       <StatusBar
         backgroundColor={whotheme.colors.primary}
         barStyle={'light-content'}
       />
-      {busy && (
+      {isLoading && (
         <View style={styles.LoadingContainer}>
           <ActivityIndicator size={'large'} color={whotheme.colors.tertiary} />
         </View>
       )}
-      {!busy && fault && (
+      {error && (
         <View style={styles.AsksErrorContainer}>
-          <BodyText>{fault}</BodyText>
+          <BodyText>{error.toString()}</BodyText>
+          <ActionButton
+            onPress={() => onRefresh}
+            children={'reload'}
+            style={styles.ReloadButton}
+          />
         </View>
       )}
-      {!busy && !fault && !asksData && (
+      {!isLoading && !error && data?.length === 0 && (
         <View style={styles.LoadingContainer}>
           <BodyText style={styles.ErrorText}>
             {
@@ -126,14 +97,14 @@ export default function AllAsks() {
           </BodyText>
         </View>
       )}
-      {!busy && !fault && asksData.length > 0 && (
+      {data && (
         <FlatList
           style={styles.ScrollableView}
-          data={asksData}
+          data={data}
           keyExtractor={item => item._id}
           refreshControl={
             <RefreshControl
-              refreshing={refreshing}
+              refreshing={isLoading}
               onRefresh={onRefresh}
               colors={[whotheme.colors.primaryLight]}
             />
@@ -191,5 +162,13 @@ const styles = StyleSheet.create({
   ErrorText: {
     textAlign: 'center',
     color: whotheme.colors.tertiary,
+  },
+  ReloadButton: {
+    borderRadius: 10,
+    marginTop: 30,
+    height: 36,
+    padding: 0,
+    paddingHorizontal: 3,
+    backgroundColor: whotheme.colors.secondary,
   },
 });

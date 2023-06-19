@@ -12,10 +12,9 @@ import {RouteStackParams, tempUserType} from '../../global/types';
 import {ScrollView} from 'react-native-gesture-handler';
 
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {whotheme} from '../../global/variables';
+import {BASE_URL, whotheme} from '../../global/variables';
 
 import {
-  axiosRequest,
   getItemLocalStorage,
   removeItemLocalStorage,
   setItemLocalStorage,
@@ -25,13 +24,16 @@ import BaseInputComponent from '../../components/imputComponents/BaseInputCompon
 import BodyText from '../../components/textComponents/BodyText';
 import Heading1Text from '../../components/textComponents/Heading1Text';
 import Heading2Text from '../../components/textComponents/Heading2Text';
+import axios from 'axios';
+import {useAppDispatch} from '../../redux/hooks';
+import {populateUser} from '../../redux/slices/userSlice';
 
 const image_add = require('../../images/icons/image_add.png');
 
 export default function Contact() {
   const navigation =
     useNavigation<NativeStackNavigationProp<RouteStackParams>>();
-
+  const dispatch = useAppDispatch();
   // const [tempThisUser, setTempThisUser] = useState<any>();
   const [busy, setBusy] = useState<boolean>(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -57,9 +59,10 @@ export default function Contact() {
     setBusy(true);
     setFault(false);
     try {
-      const user = await axiosRequest('/users/one', 'POST', {...formData});
+      const user = await axios.post(`${BASE_URL}/users/one`, formData);
       await setItemLocalStorage('@thisUser', JSON.stringify(user.data));
       await removeItemLocalStorage('@tempThisUser');
+      dispatch(populateUser(user.data));
       setBusy(false);
       navigation.navigate('AsksNav');
     } catch (error) {

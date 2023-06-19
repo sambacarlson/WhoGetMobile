@@ -19,38 +19,25 @@ import BodyText from '../../components/textComponents/BodyText';
 import Heading1Text from '../../components/textComponents/Heading1Text';
 import Heading2Text from '../../components/textComponents/Heading2Text';
 import {
-  axiosRequest,
   getItemLocalStorage,
+  logMessage,
   setItemLocalStorage,
 } from '../../global/functions';
+import {useAxiosQuery} from '../../global/fetching';
+import {useQueryClient} from '@tanstack/react-query';
 
 // const categories = Array.from(new Set([...defaultInterests]));
 
 export default function Interests() {
-  // const dispatch = useAppDispatch();
-  const onRefresh = useCallback(() => {
-    setLoading(true);
-    // fetch categories
-    axiosRequest('interests/all', 'GET')
-      .then(results => {
-        setLoading(false);
-        setAllCategories(results.data);
-      })
-      .catch(error => {
-        setLoading(false);
-        setFault(error);
-      });
-  }, []);
+  const queryClient = useQueryClient();
   const navigation =
     useNavigation<NativeStackNavigationProp<RouteStackParams>>();
-  const [busy, setBusy] = useState<boolean>(false); // for continue button
-  const [loading, setLoading] = useState<boolean>(false); // for loading interests button
-  // const [fault, setFault] = useState<string>('');
-  const [tempThisUser, setTempThisUser] = useState<any>('');
 
+  const [tempThisUser, setTempThisUser] = useState<any>('');
   const [chosenCategories, setChosenCategories] = useState<interestType[]>([]);
   const [allCategories, setAllCategories] = useState<interestType[]>([]);
   const [fault, setFault] = useState<string>('');
+  const [busy, setBusy] = useState<boolean>(false);
 
   //add interest
   const handleAddInterest = (value: interestType) => {
@@ -71,7 +58,7 @@ export default function Interests() {
   const handleContinue = () => {
     setBusy(true);
     //save(append) @tempThisUser
-    console.log('tempUser', tempThisUser);
+    logMessage('tempUser::::>', tempThisUser);
     setItemLocalStorage(
       '@tempThisUser',
       JSON.stringify({
@@ -82,32 +69,39 @@ export default function Interests() {
       .then(() => {
         navigation.navigate('Contact');
       })
-      .catch(() => {
-        setBusy(false);
+      .catch(error => {
+        setFault(error as string);
       });
     //navigate to contacts
     setBusy(false);
     navigation.navigate('Contact');
   };
-
+  // useQuery
+  const {data, isLoading, error} = useAxiosQuery(
+    ['interests'],
+    'interests/all',
+  );
   useEffect(() => {
-    setLoading(true);
     //get tempThisUser from local storage
-    getItemLocalStorage('@tempThisUser').then(results =>
-      setTempThisUser(results),
-    );
-    // fetch categories
-    axiosRequest('interests/all', 'GET')
+    data && setAllCategories(data);
+    getItemLocalStorage('@tempThisUser')
       .then(results => {
-        setLoading(false);
-        setAllCategories(results.data);
+        if (results !== null) {
+          setTempThisUser(results);
+        } else {
+          navigation.navigate('Auth');
+        }
       })
-      .catch(error => {
-        setLoading(false);
-        setFault(error);
-      });
-  }, []);
+      .catch(() => setFault('an error occured'));
+  }, [data, navigation]);
 
+  // logMessage(data);
+  logMessage('fault==>>', fault);
+
+  // on refresh
+  const onRefresh = useCallback(() => {
+    queryClient.invalidateQueries(['interests']);
+  }, [queryClient]);
   //Return
   return (
     <SafeAreaView style={styles.Container}>
@@ -120,22 +114,24 @@ export default function Interests() {
         <BodyText>Choose as many as interests you</BodyText>
       </View>
       <View style={styles.Body}>
-        {!busy && fault && (
+        {error ? (
           <View style={styles.FaultOrLoadingContainer}>
-            <BodyText style={styles.FaultText}>{fault}</BodyText>
+            <BodyText style={styles.FaultText}>{error as string}</BodyText>
           </View>
+        ) : (
+          ''
         )}
-        {loading && (
+        {isLoading && (
           <View style={styles.FaultOrLoadingContainer}>
             <ActivityIndicator size="large" color={whotheme.colors.primary} />
           </View>
         )}
-        {!fault && !busy && (
+        {!error && !isLoading && (
           <ScrollView
             style={styles.ScrollContainer}
             refreshControl={
               <RefreshControl
-                refreshing={loading}
+                refreshing={isLoading}
                 onRefresh={onRefresh}
                 colors={[whotheme.colors.primaryLight]}
               />
@@ -161,7 +157,7 @@ export default function Interests() {
                 <View style={styles.AllCategories}>
                   {/* here map over chosen interests and display */}
                   {allCategories &&
-                    allCategories.map(category => (
+                    allCategories.map((category: any) => (
                       <CategoryButton
                         key={category._id}
                         onPress={() => {

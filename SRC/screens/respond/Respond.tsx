@@ -19,37 +19,33 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RouteStackParams, askType, userType} from '../../global/types';
 import HeaderTitle from '../../components/headerStyleComponents/HeaderTitle';
 // import HeaderLeft from '../../components/headerStyleComponents/HeaderLeft';
-import {
-  formattedDate,
-  getItemLocalStorage,
-  getTimeLeft,
-} from '../../global/functions';
+import {formattedDate, getTimeLeft} from '../../global/functions';
 import BodyText from '../../components/textComponents/BodyText';
 import {useAppSelector} from '../../redux/hooks';
 // import {formatDistanceToNow} from 'date-fns';
 
 export default function Respond({route}: any) {
   const {askId} = route.params;
-  const [thisUser, setThisUser] = useState<userType>();
+  const loadedUser = useAppSelector(state => state.user);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [thisUser, setThisUser] = useState<userType>(loadedUser);
   const [isExpired, setIsExpired] = useState<boolean>(true);
   //get asks
   const oneAsk: askType = useAppSelector(
     state => state.ask.filter(ask => ask._id === askId)[0],
   );
-  let greeting: string;
+  let greeting: string = '';
   if (oneAsk.user && thisUser) {
     greeting = `Hello, ${oneAsk.user.username}, I am ${
       thisUser.username
     }. I came across your request on *whoget*. from ${formattedDate(
       oneAsk.updatedAt,
     )}. `;
-  } else {
-    greeting = '';
   }
-  // useEffect
-  useEffect(() => {
-    getItemLocalStorage('@thisUser').then(value => setThisUser(value));
-  }, []);
+  // // useEffect
+  // useEffect(() => {
+  //   getItemLocalStorage('@thisUser').then(value => setThisUser(value));
+  // }, []);
   const navigation =
     useNavigation<NativeStackNavigationProp<RouteStackParams>>();
   navigation.setOptions({

@@ -3,26 +3,24 @@ import {StyleSheet, ScrollView, View} from 'react-native';
 import {BASE_URL, whotheme} from '../../global/variables';
 import {useNavigation} from '@react-navigation/core';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {RouteStackParams, userType} from '../../global/types';
-import axios from 'axios';
+import {RouteStackParams} from '../../global/types';
 import {ActionButton} from '../../components/buttonComponents/ActionButton';
 import CategoryButton from '../../components/buttonComponents/CategoryButton';
 import BaseInputComponent from '../../components/imputComponents/BaseInputComponent';
 import Heading2Text from '../../components/textComponents/Heading2Text';
-import {getItemLocalStorage} from '../../global/functions';
-// import {useAppDispatch} from '../../redux/hooks';
-// import {createAsk} from '../../redux/slices/askSlice';
 import BodyText from '../../components/textComponents/BodyText';
+import {useAppSelector} from '../../redux/hooks';
+import {useAxiosMutate} from '../../global/fetching';
 
 // const askImage = require('../../images/icons/image_add.png');
 
 export default function NewAsk(this: any) {
   const navigation =
     useNavigation<NativeStackNavigationProp<RouteStackParams>>();
-  // const dispatch = useAppDispatch();
-  const [isBusy, setIsBusy] = useState<boolean>(false);
-  const [fault, setFault] = useState<string>('');
-  const [thisUser, setThisUser] = useState<userType>();
+  const thisUser = useAppSelector(state => state.user);
+  // const [thisUser, setThisUser] = useState<userType>(loadedUser);
+  // const [isBusy, setIsBusy] = useState<boolean>(false);
+  // const [fault, setFault] = useState<string>('');
 
   const allMyInterests = thisUser ? thisUser.interests : [];
 
@@ -65,38 +63,19 @@ export default function NewAsk(this: any) {
     setNewAskData(prevData => ({...prevData, [name]: value}));
   };
   //submit
-  const submitForm = async () => {
-    try {
-      setFault('');
-      setIsBusy(true);
-      console.log('ask to create>>', {
-        ...newAskData,
-        expiry: Number(newAskData.expiry),
-        user: thisUser?._id,
-      });
-      const response = await axios.post(`${BASE_URL}/asks/one`, newAskData);
-      // dispatch(createAsk([...response.data]));
-      console.log('the just created asks===<>>', response.data);
-      setIsBusy(false);
-      navigation.navigate('AsksNav');
-      // return response.data;
-    } catch (error: any) {
-      setFault(error.message);
-      setIsBusy(false);
-    }
-  };
+  const createAsk = useAxiosMutate(
+    ['asks'],
+    `${BASE_URL}/asks/one`,
+    'POST',
+    newAskData,
+  );
 
-  //use effect
+  //useEffect
   useEffect(() => {
-    setFault('');
-    getItemLocalStorage('@thisUser').then(results => {
-      setThisUser(results);
-      console.log('thisUser in effect >>>==>', results);
-      if (results === null) {
-        navigation.navigate('Auth');
-      }
-    });
-  }, [navigation]);
+    if (!thisUser._id) {
+      navigation.navigate('Auth');
+    }
+  }, [navigation, thisUser]);
 
   //return
   return (
@@ -129,7 +108,7 @@ export default function NewAsk(this: any) {
       <View style={styles.ContentView}>
         <Heading2Text>Categories</Heading2Text>
         <View style={styles.Categories}>
-          {allMyInterests.map((interest: string) => (
+          {allMyInterests?.map((interest: string) => (
             <CategoryButton
               key={allMyInterests.indexOf(interest) + interest}
               setActiveState={true}
@@ -145,12 +124,14 @@ export default function NewAsk(this: any) {
           {/* <Image source={askImage} style={styles.AskImage} /> */}
         </View>
       </View>
-      {fault && <BodyText style={styles.Expiry}>{fault}</BodyText>}
+      {createAsk.error ? (
+        <BodyText style={styles.Expiry}>{createAsk.error as string}</BodyText>
+      ) : null}
       <View style={styles.ActionButtonView}>
         <ActionButton
-          onPress={!isBusy && submitForm}
-          busy={isBusy}
-          style={fault && styles.FaultOccured}>
+          onPress={createAsk}
+          busy={createAsk.isLoading}
+          style={createAsk.error ? styles.FaultOccured : {}}>
           Done
         </ActionButton>
       </View>

@@ -1,7 +1,4 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {httpMethodTypes} from './types';
-import axios from 'axios';
-import {BASE_URL} from './variables';
 
 /**
  * @param isoTimestamp {string} iso timestamp as string
@@ -110,12 +107,13 @@ export function getTimeLeft(
 }
 
 /**
+/**
  * makes an axios request.
  * @param url {string} relative uri endpoint. provide only relative uri
  * @param method {http.HttpMethod} http method
  * @param data {object} (Optional depending on method) data
  * @returns {Promise}
- */
+ *-/
 export async function axiosRequest(
   url: string,
   method: httpMethodTypes,
@@ -132,14 +130,16 @@ export async function axiosRequest(
     throw error.message;
   }
 }
+//*/
 
 /**
  * logs a message
  * @param message {any[]} message to log
  * @returns {void}
  */
-export function logMessage(...message: string[]): void {
-  const blockLogs = false; //determines whether or not to turn on/off logs
-  !blockLogs && console.log('log--->', ...message);
+export function logMessage(...message: any): void {
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('log--->', ...message);
+  }
   return;
 }

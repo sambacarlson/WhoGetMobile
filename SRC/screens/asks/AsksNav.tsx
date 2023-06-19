@@ -16,7 +16,10 @@ export default function AsksNav() {
   navigation.setOptions({
     // eslint-disable-next-line react/no-unstable-nested-components
     headerRight: () => (
-      <HeaderRight onPressNewAsk={() => navigation.navigate('NewAsk')} />
+      <HeaderRight
+        onPressNewAsk={() => navigation.navigate('NewAsk')}
+        onPressEdit={() => navigation.navigate('Interests')}
+      />
     ),
   });
   /************* */
